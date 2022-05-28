@@ -21,16 +21,8 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-module alu (
-  input   logic[]      opt,
-  input   logic[31:0]  operand1,
-  input   logic[31:0]  operand2,
-  output  logic[31:0]  result
-);
-
-  always_comb begin
-  end
-  
-endmodule // alu
+package riscv_pkg; 
+  struct instruction_t {
+    logic is_imm;
+  };
+endpackage // riscv_pkg
