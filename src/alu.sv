@@ -29,6 +29,7 @@ module alu (
   input   logic[31:0]  operand2,
   output  logic[31:0]  result
 );
+import riscv_pkg::*;
 
 always_comb begin
   case (op_i)
@@ -62,5 +63,6 @@ always_comb begin
     F3_ALU_AND:   begin
       result = operand1 & operand2;
       end
+  endcase
 end
 endmodule // alu

@@ -32,29 +32,157 @@ typedef int (*action_t)(Valu *);
 
 int reset(Valu * dut) {
   static int time = 0;
-  if(dut->clk_i) {
-    switch(time) {
-      case 0:
-        printf("Starting reset\n");
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-        break;
-      case 5:
-        return 1;
-    }
-
-    time += 1;
+  switch(time) {
+    case 0:
+      printf("Starting reset\n");
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+      break;
+    case 5:
+      return 1;
   }
+
+  time += 1;
+  return 0;
+}
+
+int tb_add(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_add\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_sub(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_sub\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_sll(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_sll\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_slt(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_slt\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_sltu(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_sltu\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_xor(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_xor\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_sra(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_sra\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_srl(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_srl\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_or(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_or\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_and(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0:
+      printf("Starting tb_and\n");
+    case 1:
+      return 1;
+  }
+
+  time += 1;
   return 0;
 }
 
 vluint64_t sim_time = 0;
 
 // List of tests to execute
-#define num_actions 1
-action_t actions[] = {reset };
+#define num_actions 11
+action_t actions[] = { reset, tb_add, tb_sub, tb_sll, tb_slt, tb_sltu, tb_xor, tb_sra, tb_srl, tb_or, tb_and };
 
 int main(int argc, char ** argv, char ** env) {
   Valu *dut = new Valu;
@@ -66,10 +194,7 @@ int main(int argc, char ** argv, char ** env) {
 
   action_t * current_action = actions;
   // We are done when there are no more actions and the clk is low 
-  while(current_action < (actions + num_actions) || dut->clk_i == 1) {
-    // Clock
-    dut->clk_i ^= 1;
-
+  while(current_action < (actions + num_actions)) {
     // Perform actions 
     int current_done = (*current_action)(dut);
     if(current_done) {

@@ -23,8 +23,10 @@
 
 SRC_DIR = src
 TB_DIR = tb
+INCLUDE = include/riscv_pkg.sv 
 SRC = src/rv32i.sv \
-			src/regfile.sv
+			src/regfile.sv \
+			src/alu.sv \
 
 top_module = rv32i
 MODULES = regfile alu
@@ -37,7 +39,7 @@ build:
 
 $(MODULES): build
 	@echo "Simulating module $@"
-	verilator --Mdir build/ -Wall --cc --trace --exe ${TB_DIR}/tb_$@.cpp ${SRC_DIR}/$@.sv
+	verilator --Mdir build/ -Wall -cc --trace --exe ${INCLUDE} ${TB_DIR}/tb_$@.cpp ${SRC_DIR}/$@.sv --prefix V$@
 	make -C build -f V$@.mk V$@
 
 sim : $(MODULES)
