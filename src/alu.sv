@@ -21,16 +21,46 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 module alu (
-  input   logic[]      opt,
+  input   logic[2:0]   op_i,
+  // funct7 field used for SUB and SRA operations
+  input   logic        alt_op,
   input   logic[31:0]  operand1,
   input   logic[31:0]  operand2,
   output  logic[31:0]  result
 );
 
-  always_comb begin
-  end
-  
+always_comb begin
+  case (op_i)
+    F3_ALU_ADD:   begin
+      if (alt_op) // SUB
+        result = operand1 - operand2;
+      else        // ADD
+        result = operand1 + operand2;
+      end
+    F3_ALU_SLL:   begin
+      result = operand1 << operand2;
+      end
+    F3_ALU_SLT:   begin
+      result = $signed(operand1) < $signed(operand2) ? 1 : 0;
+      end
+    F3_ALU_SLTU:  begin
+      result = operand1 < operand2 ? 1 : 0;
+      end
+    F3_ALU_XOR:   begin
+      result = operand1 ^ operand2;
+      end
+    F3_ALU_SR:    begin
+      if (alt_op) // SRA
+        result = operand1 >>> operand2;
+      else        // SRL
+        result = operand1 >> operand2;
+      end
+    F3_ALU_OR:    begin
+      result = operand1 | operand2;
+      end
+    F3_ALU_AND:   begin
+      result = operand1 & operand2;
+      end
+end
 endmodule // alu

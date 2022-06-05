@@ -21,9 +21,8 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module decoder (
-  input   logic[32:0]    instruction_i,
-  output  instruction_t  instruction_o
+module fetch (
+  output logic [31:0] instruction_o
 );
 
-endmodule // decoder
+endmodule // fetch

@@ -27,7 +27,7 @@ SRC = src/rv32i.sv \
 			src/regfile.sv
 
 top_module = rv32i
-MODULES = regfile
+MODULES = regfile alu
 
 all:
 	verilator --lint-only -Wall ${SRC} --top-module ${top_module}

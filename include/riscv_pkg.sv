@@ -23,6 +23,8 @@
 
 package riscv_pkg; 
 
+parameter XLEN = 32;
+
 // opcode field values
 parameter  OP_LUI       =  5'b01101;
 parameter  OP_AUIPC     =  5'b00101;
