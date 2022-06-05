@@ -31,6 +31,8 @@ SRC = src/rv32i.sv \
 top_module = rv32i
 MODULES = regfile alu
 
+VERILATOR_OPTS = -Wall --cc --trace --Wno-unused
+
 all:
 	verilator --lint-only -Wall ${SRC} --top-module ${top_module}
 
@@ -39,7 +41,7 @@ build:
 
 $(MODULES): build
 	@echo "Simulating module $@"
-	verilator --Mdir build/ -Wall -cc --trace --exe ${INCLUDE} ${TB_DIR}/tb_$@.cpp ${SRC_DIR}/$@.sv --prefix V$@
+	verilator ${VERILATOR_OPTS} --Mdir build/ --exe ${INCLUDE} ${TB_DIR}/tb_$@.cpp ${SRC_DIR}/$@.sv --prefix V$@
 	make -C build -f V$@.mk V$@
 
 sim : $(MODULES)

@@ -30,6 +30,15 @@
 
 typedef int (*action_t)(Valu *);
 
+#define  OP_ADD   0
+#define  OP_SLL   1
+#define  OP_SLT   2
+#define  OP_SLTU  3
+#define  OP_XOR   4
+#define  OP_SR    5
+#define  OP_OR    6
+#define  OP_AND   7
+
 int reset(Valu * dut) {
   static int time = 0;
   switch(time) {
@@ -53,7 +62,29 @@ int tb_add(Valu * dut) {
   switch(time) {
     case 0:
       printf("Starting tb_add\n");
-    case 1:
+    case 1: // Simple add test
+      dut->op_i = OP_ADD;
+      dut->alt_op = 0;
+      dut->operand1 = 10;
+      dut->operand2 = 5;
+
+      dut->eval();
+
+      if(dut->result != 0xf) {
+        printf("Failed tb_add: 0xa + 0x5 = 0xf /= %d\n", dut->result);
+      }
+      break;
+    case 2: // Overflow test
+      dut->op_i = OP_ADD;
+      dut->alt_op = 0;
+      dut->operand1 = 0xffffffff;
+      dut->operand2 = 5;
+
+      dut->eval();
+
+      if(dut->result != 0x4) {
+        printf("Failed tb_add: 0xffffffff + 0x5 = 0x4 /= %d\n", dut->result);
+      }
       return 1;
   }
 
@@ -66,7 +97,29 @@ int tb_sub(Valu * dut) {
   switch(time) {
     case 0:
       printf("Starting tb_sub\n");
-    case 1:
+    case 1: // Simple sub test
+      dut->op_i = OP_ADD;
+      dut->alt_op = 0;
+      dut->operand1 = 10;
+      dut->operand2 = -5;
+
+      dut->eval();
+
+      if(dut->result != 0x5) {
+        printf("Failed tb_add: 0xa - 0x5 = 0x5 /= %d\n", dut->result);
+      }
+      break;
+    case 2: // Overflow test
+      dut->op_i = OP_ADD;
+      dut->alt_op = 0;
+      dut->operand1 = 0;
+      dut->operand2 = -5;
+
+      dut->eval();
+
+      if(dut->result != 0xfffffffb) {
+        printf("Failed tb_add: 0x0 - 0x5 = 0xfffffffb /= %d\n", dut->result);
+      }
       return 1;
   }
 
