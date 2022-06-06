@@ -21,6 +21,8 @@
 
 .PHONY: sim
 
+PROJECT_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
 SRC_DIR = src
 TB_DIR = tb
 INCLUDE = include/riscv_pkg.sv 
@@ -41,7 +43,7 @@ build:
 
 $(MODULES): build
 	@echo "Simulating module $@"
-	verilator ${VERILATOR_OPTS} --Mdir build/ --exe ${INCLUDE} ${TB_DIR}/tb_$@.cpp ${SRC_DIR}/$@.sv --prefix V$@
+	verilator ${VERILATOR_OPTS} --Mdir build/ --exe ${PROJECT_ROOT}${INCLUDE} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp ${PROJECT_ROOT}${SRC_DIR}/$@.sv --prefix V$@ -CFLAGS -I${PROJECT_ROOT}/tb/lib
 	make -C build -f V$@.mk V$@
 
 sim : $(MODULES)

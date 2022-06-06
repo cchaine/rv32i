@@ -26,6 +26,8 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
+#include <term.h>
+
 #include "Valu.h"
 
 typedef int (*action_t)(Valu *);
@@ -39,30 +41,10 @@ typedef int (*action_t)(Valu *);
 #define  OP_OR    6
 #define  OP_AND   7
 
-int reset(Valu * dut) {
-  static int time = 0;
-  switch(time) {
-    case 0:
-      printf("Starting reset\n");
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-      break;
-    case 5:
-      return 1;
-  }
-
-  time += 1;
-  return 0;
-}
-
 int tb_add(Valu * dut) {
   static int time = 0;
   switch(time) {
-    case 0:
-      printf("Starting tb_add\n");
-    case 1: // Simple add test
+    case 0: // Simple add test
       dut->op_i = OP_ADD;
       dut->alt_op = 0;
       dut->operand1 = 10;
@@ -71,10 +53,22 @@ int tb_add(Valu * dut) {
       dut->eval();
 
       if(dut->result != 0xf) {
-        printf("Failed tb_add: 0xa + 0x5 = 0xf /= %d\n", dut->result);
+        pfail("Failed tb_add\n");
+        pfail("  0xa + 0x5 : expected 0xf, got 0x%x\n", dut->result);
+      } else {
+        psuccess("Success tb_add !\n");
       }
-      break;
-    case 2: // Overflow test
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_add_overflow(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0: // Overflow test
       dut->op_i = OP_ADD;
       dut->alt_op = 0;
       dut->operand1 = 0xffffffff;
@@ -83,7 +77,10 @@ int tb_add(Valu * dut) {
       dut->eval();
 
       if(dut->result != 0x4) {
-        printf("Failed tb_add: 0xffffffff + 0x5 = 0x4 /= %d\n", dut->result);
+        pfail("Failed tb_add_overflow\n");
+        pfail("  0xffffffff + 0x5 : expected 0x4, got 0x%x\n", dut->result);
+      } else {
+        psuccess("Success tb_add_overflow !\n");
       }
       return 1;
   }
@@ -95,30 +92,43 @@ int tb_add(Valu * dut) {
 int tb_sub(Valu * dut) {
   static int time = 0;
   switch(time) {
-    case 0:
-      printf("Starting tb_sub\n");
-    case 1: // Simple sub test
+    case 0: // Simple sub test
       dut->op_i = OP_ADD;
-      dut->alt_op = 0;
+      dut->alt_op = 1;
       dut->operand1 = 10;
-      dut->operand2 = -5;
+      dut->operand2 = 5;
 
       dut->eval();
 
       if(dut->result != 0x5) {
-        printf("Failed tb_add: 0xa - 0x5 = 0x5 /= %d\n", dut->result);
+        pfail("Failed tb_sub\n");
+        pfail("  0xa - 0x5 : expected 0x5, got 0x%x\n", dut->result);
+      } else {
+        psuccess("Success tb_sub !\n");
       }
-      break;
-    case 2: // Overflow test
+      return 1;
+  }
+
+  time += 1;
+  return 0;
+}
+
+int tb_sub_overflow(Valu * dut) {
+  static int time = 0;
+  switch(time) {
+    case 0: // Overflow test
       dut->op_i = OP_ADD;
-      dut->alt_op = 0;
+      dut->alt_op = 1;
       dut->operand1 = 0;
-      dut->operand2 = -5;
+      dut->operand2 = 5;
 
       dut->eval();
 
       if(dut->result != 0xfffffffb) {
-        printf("Failed tb_add: 0x0 - 0x5 = 0xfffffffb /= %d\n", dut->result);
+        pfail("Failed tb_sub_overflow\n");
+        pfail("  0x0 - 0x5 : expected 0xfffffffb, got 0x%x\n", dut->result);
+      } else {
+        psuccess("Success tb_sub_overflow !\n");
       }
       return 1;
   }
@@ -234,8 +244,8 @@ int tb_and(Valu * dut) {
 vluint64_t sim_time = 0;
 
 // List of tests to execute
-#define num_actions 11
-action_t actions[] = { reset, tb_add, tb_sub, tb_sll, tb_slt, tb_sltu, tb_xor, tb_sra, tb_srl, tb_or, tb_and };
+#define num_actions 12
+action_t actions[] = { tb_add, tb_add_overflow, tb_sub, tb_sub_overflow, tb_sll, tb_slt, tb_sltu, tb_xor, tb_sra, tb_srl, tb_or, tb_and };
 
 int main(int argc, char ** argv, char ** env) {
   Valu *dut = new Valu;
