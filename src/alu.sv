@@ -53,7 +53,7 @@ always_comb begin
       end
     F3_ALU_SR:    begin
       if (alt_op) // SRA
-        result = operand1 >>> operand2;
+        result = $signed(operand1) >>> operand2;
       else        // SRL
         result = operand1 >> operand2;
       end
