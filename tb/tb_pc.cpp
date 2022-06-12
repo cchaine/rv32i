@@ -26,71 +26,64 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#include "Vregfile.h"
+#include <term.h>
 
-typedef int (*action_t)(Vregfile *);
+#include "Vpc.h"
 
-int reset(Vregfile * dut) {
+typedef int (*action_t)(Vpc *);
+
+int reset(Vpc * dut) {
   static int time = 0;
   if(dut->clk_i) {
     switch(time) {
       case 0:
-        printf("Starting reset\n");
       case 1:
       case 2:
       case 3:
       case 4:
         dut->rst_i = 1;
-        dut->waddr_i = 0;
-        dut->raddra_i = 0;
-        dut->raddrb_i = 0;
-        dut->write_i = 0;
-        dut->wdata_i = 0;
         break;
       case 5:
         dut->rst_i = 0;
         return 1;
     }
-
     time += 1;
   }
   return 0;
 }
 
-int tb_write_read(Vregfile * dut) {
+int tb_count(Vpc * dut) {
   static int time = 0;
-
+  static int success = 1;
   if(dut->clk_i) {
     switch(time) {
-      case 0:
-        printf("Starting tb_write_read\n");
-        // Set first data to be written
-        dut->waddr_i = 0x1;
-        dut->wdata_i = 0xAAAAAAAA;
-        dut->write_i = 1;
-        break;
+      case 0: 
       case 1:
-        // Set second data to be written
-        dut->waddr_i = 0x2;
-        dut->wdata_i = 0xBBBBBBBB;
-        dut->write_i = 1;
-        break;
       case 2:
-        // Stop writing
-        dut->write_i = 0;
-        break;
       case 3:
-        // Set read address
-        dut->raddra_i = 0x1;
-        dut->raddrb_i = 0x2;
-
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+      case 14:
+      case 15:
         dut->eval();
 
-        if(dut->rdataa_o != 0xAAAAAAAA) {
-          printf("Failed tb_write_read: written 0xAAAAAAAA, read %x @ 0x1\n", dut->rdataa_o);
+        if(dut->pc_o != (time+1) * 4) {
+          pfail("Failed tb_count\n");
+          pfail("  expected 0x%x, got 0x%x\n", (time+1) * 4, dut->pc_o);
+          success = 0;
         }
-        if(dut->rdatab_o != 0xBBBBBBBB) {
-          printf("Failed tb_write_read: written 0xAAAAAAAA, read %x @ 0x2\n", dut->rdataa_o);
+        break;
+      case 16:
+        if(success) {
+          psuccess("Success tb_count !\n");
         }
         return 1;
     }
@@ -100,56 +93,54 @@ int tb_write_read(Vregfile * dut) {
   return 0;
 }
 
-int tb_write_read_x0(Vregfile * dut) {
+int tb_reset(Vpc * dut) {
   static int time = 0;
+  static int success = 1;
   if(dut->clk_i) {
     switch(time) {
-      case 0:
-        printf("Starting tb_write_read_x0\n");
-        // Write to x0
-        dut->waddr_i = 0;
-        dut->wdata_i = 0xAAAAAAAA;
-        dut->write_i = 1;
-        break;
+      case 0: 
       case 1:
-        // Stop writing
-        dut->write_i = 0;
-        break;
-      case 2:
-        // Read x0
-        dut->raddra_i = 0;
+        dut->rst_i = 1;
 
         dut->eval();
 
-        if(dut->rdataa_o != 0) {
-          printf("Failed tb_write_read_x0\n");
+        if(dut->pc_o != 0) {
+          if(dut->pc_o != time * 4) {
+            pfail("Failed tb_reset\n");
+            pfail("  expected 0x%x, got 0x%x\n", time * 4, dut->pc_o);
+            success = 0;
+          }
+        }
+        break;
+      case 2:
+        if(success) {
+          psuccess("Success tb_reset !\n");
         }
         return 1;
     }
 
     time += 1;
   }
-  return 0;     
+  return 0;
 }
 
-#define MAX_SIM_TIME 20
 vluint64_t sim_time = 0;
 
 // List of tests to execute
 #define num_actions 3
-action_t actions[] = {reset, tb_write_read, tb_write_read_x0};
+action_t actions[] = { reset, tb_count, tb_reset };
 
 int main(int argc, char ** argv, char ** env) {
-  Vregfile *dut = new Vregfile;
+  Vpc *dut = new Vpc;
 
   Verilated::traceEverOn(true);
   VerilatedVcdC *m_trace = new VerilatedVcdC;
   dut->trace(m_trace, 5);
-  m_trace->open("regfile.vcd");
+  m_trace->open("pc.vcd");
 
   action_t * current_action = actions;
   // We are done when there are no more actions and the clk is low 
-  while(current_action < (actions + num_actions) || dut->clk_i == 1) {
+  while(current_action < (actions + num_actions)) {
     // Clock
     dut->clk_i ^= 1;
 

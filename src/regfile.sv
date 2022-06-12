@@ -23,7 +23,7 @@
 
 module regfile (
   input   logic           clk_i,
-  input   logic           rst_ni,
+  input   logic           rst_i,
   input   logic           write_i,
   input   logic  [4:0]    waddr_i,
   input   logic  [31:0]   wdata_i,
@@ -39,10 +39,10 @@ module regfile (
     rdatab_o = regs[raddrb_i];
   end
 
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (rst_ni == 0) begin
-      foreach (regs[i]) begin
-        regs[i] <= '0;
+  always_ff @(posedge clk_i) begin
+      if (rst_i) begin
+        foreach (regs[i]) begin
+          regs[i] <= '0;
       end
     end else if(write_i == 1) begin
       if(waddr_i != 0) begin

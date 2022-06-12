@@ -47,29 +47,29 @@ int tb_add(Valu * dut) {
   switch(time) {
     case 0: // Simple add test
       dut->op_i = OP_ADD;
-      dut->alt_op = 0;
-      dut->operand1 = 10;
-      dut->operand2 = 5;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 10;
+      dut->operand2_i = 5;
 
       dut->eval();
 
-      if(dut->result != 0xf) {
+      if(dut->result_o != 0xf) {
         pfail("Failed tb_add\n");
-        pfail("  0xa + 0x5 : expected 0xf, got 0x%x\n", dut->result);
+        pfail("  0xa + 0x5 : expected 0xf, got 0x%x\n", dut->result_o);
         success = 0;
       }
       break;
     case 1: // Overflow test
       dut->op_i = OP_ADD;
-      dut->alt_op = 0;
-      dut->operand1 = 0xffffffff;
-      dut->operand2 = 5;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 0xffffffff;
+      dut->operand2_i = 5;
 
       dut->eval();
 
-      if(dut->result != 0x4) {
+      if(dut->result_o != 0x4) {
         pfail("Failed tb_add_overflow\n");
-        pfail("  0xffffffff + 0x5 : expected 0x4, got 0x%x\n", dut->result);
+        pfail("  0xffffffff + 0x5 : expected 0x4, got 0x%x\n", dut->result_o);
         success = 0;
       }
       break;
@@ -90,27 +90,27 @@ int tb_sub(Valu * dut) {
   switch(time) {
     case 0: // Simple sub test
       dut->op_i = OP_ADD;
-      dut->alt_op = 1;
-      dut->operand1 = 10;
-      dut->operand2 = 5;
+      dut->alt_op_i = 1;
+      dut->operand1_i = 10;
+      dut->operand2_i = 5;
 
       dut->eval();
 
-      if(dut->result != 0x5) {
+      if(dut->result_o != 0x5) {
         pfail("Failed tb_sub\n");
-        pfail("  0xa - 0x5 : expected 0x5, got 0x%x\n", dut->result);
+        pfail("  0xa - 0x5 : expected 0x5, got 0x%x\n", dut->result_o);
         success = 0;
       }
       break;
     case 1: // Overflow test
-      dut->operand1 = 0;
-      dut->operand2 = 5;
+      dut->operand1_i = 0;
+      dut->operand2_i = 5;
 
       dut->eval();
 
-      if(dut->result != 0xfffffffb) {
+      if(dut->result_o != 0xfffffffb) {
         pfail("Failed tb_sub\n");
-        pfail("  0x0 - 0x5 : expected 0xfffffffb, got 0x%x\n", dut->result);
+        pfail("  0x0 - 0x5 : expected 0xfffffffb, got 0x%x\n", dut->result_o);
         success = 0;
       }
     case 2:
@@ -130,15 +130,15 @@ int tb_sll(Valu * dut) {
   switch(time) {
     case 0:
       dut->op_i = OP_SLL;
-      dut->alt_op = 0;
-      dut->operand1 = 0x55555555;
-      dut->operand2 = 5;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 0x55555555;
+      dut->operand2_i = 5;
 
       dut->eval();
 
-      if(dut->result != 0xAAAAAAA0) {
+      if(dut->result_o != 0xAAAAAAA0) {
         pfail("Failed tb_sll\n");
-        pfail("  0x55555555 << 5 : expected 0xAAAAAAA0, got 0x%x\n", dut->result);
+        pfail("  0x55555555 << 5 : expected 0xAAAAAAA0, got 0x%x\n", dut->result_o);
         success = 0;
       }
     case 1:
@@ -158,51 +158,51 @@ int tb_slt(Valu * dut) {
   switch(time) {
     case 0: // Two positives, expect true
       dut->op_i = OP_SLT;
-      dut->alt_op = 0;
-      dut->operand1 = 0x1;
-      dut->operand2 = 0x2;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 0x1;
+      dut->operand2_i = 0x2;
 
       dut->eval();
 
-      if(dut->result != 0x1) {
+      if(dut->result_o != 0x1) {
         pfail("Failed tb_slt\n");
-        pfail("  0x1 < 0x2 : expected 1, got %d\n", dut->result);
+        pfail("  0x1 < 0x2 : expected 1, got %d\n", dut->result_o);
         success = 0;
       }
       break;
     case 1: // One positive, one negative
-      dut->operand1 = 0x1;
-      dut->operand2 = -0x1;
+      dut->operand1_i = 0x1;
+      dut->operand2_i = -0x1;
 
       dut->eval();
 
-      if(dut->result != 0x0) {
+      if(dut->result_o != 0x0) {
         pfail("Failed tb_slt\n");
-        pfail("  0x1 < -0x1 : expected 0, got %d\n", dut->result);
+        pfail("  0x1 < -0x1 : expected 0, got %d\n", dut->result_o);
         success = 0;
       }
       break;
     case 2: // Two negatives
-      dut->operand1 = -0x2;
-      dut->operand2 = -0x1;
+      dut->operand1_i = -0x2;
+      dut->operand2_i = -0x1;
 
       dut->eval();
 
-      if(dut->result != 0x1) {
+      if(dut->result_o != 0x1) {
         pfail("Failed tb_slt\n");
-        pfail("  -0x2 < -0x1 : expected 1, got %d\n", dut->result);
+        pfail("  -0x2 < -0x1 : expected 1, got %d\n", dut->result_o);
         success = 0;
       }
       break;
     case 3: // Equals
-      dut->operand1 = -0x2;
-      dut->operand2 = -0x2;
+      dut->operand1_i = -0x2;
+      dut->operand2_i = -0x2;
 
       dut->eval();
 
-      if(dut->result != 0x0) {
+      if(dut->result_o != 0x0) {
         pfail("Failed tb_slt\n");
-        pfail("  -0x2 < -0x2 : expected 0, got %d\n", dut->result);
+        pfail("  -0x2 < -0x2 : expected 0, got %d\n", dut->result_o);
         success = 0;
       }
       break;
@@ -223,51 +223,51 @@ int tb_sltu(Valu * dut) {
   switch(time) {
     case 0: // Two positives, expect true
       dut->op_i = OP_SLTU;
-      dut->alt_op = 0;
-      dut->operand1 = 0x1;
-      dut->operand2 = 0x2;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 0x1;
+      dut->operand2_i = 0x2;
 
       dut->eval();
 
-      if(dut->result != 0x1) {
+      if(dut->result_o != 0x1) {
         pfail("Failed tb_sltu\n");
-        pfail("  0x1 < 0x2 : expected 1, got %d\n", dut->result);
+        pfail("  0x1 < 0x2 : expected 1, got %d\n", dut->result_o);
         success = 0;
       }
       break;
     case 1: // One positive, one negative
-      dut->operand1 = 0x1;
-      dut->operand2 = -0x1;
+      dut->operand1_i = 0x1;
+      dut->operand2_i = -0x1;
 
       dut->eval();
 
-      if(dut->result != 0x1) {
+      if(dut->result_o != 0x1) {
         pfail("Failed tb_sltu\n");
-        pfail("  0x1 < -0x1(0xffffffff) : expected 1, got %d\n", dut->result);
+        pfail("  0x1 < -0x1(0xffffffff) : expected 1, got %d\n", dut->result_o);
         success = 0;
       }
       break;
     case 2: // Two negatives
-      dut->operand1 = -0x2; // 0xFFFFFFFE
-      dut->operand2 = -0x1; // 0xFFFFFFFF
+      dut->operand1_i = -0x2; // 0xFFFFFFFE
+      dut->operand2_i = -0x1; // 0xFFFFFFFF
 
       dut->eval();
 
-      if(dut->result != 0x1) {
+      if(dut->result_o != 0x1) {
         pfail("Failed tb_sltu\n");
-        pfail("  -0x2(0xFFFFFFFE) < -0x1(0xFFFFFFFF) : expected 1, got %d\n", dut->result);
+        pfail("  -0x2(0xFFFFFFFE) < -0x1(0xFFFFFFFF) : expected 1, got %d\n", dut->result_o);
         success = 0;
       }
       break;
     case 3: // Equals
-      dut->operand1 = -0x2;
-      dut->operand2 = -0x2;
+      dut->operand1_i = -0x2;
+      dut->operand2_i = -0x2;
 
       dut->eval();
 
-      if(dut->result != 0x0) {
+      if(dut->result_o != 0x0) {
         pfail("Failed tb_sltu\n");
-        pfail("  0xFFFFFFFE < 0xFFFFFFFE : expected 0, got %d\n", dut->result);
+        pfail("  0xFFFFFFFE < 0xFFFFFFFE : expected 0, got %d\n", dut->result_o);
         success = 0;
       }
       break;
@@ -288,15 +288,15 @@ int tb_xor(Valu * dut) {
   switch(time) {
     case 0:
       dut->op_i = OP_XOR;
-      dut->alt_op = 0;
-      dut->operand1 = 0xdeadbeef;
-      dut->operand2 = 0xcafecafe;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 0xdeadbeef;
+      dut->operand2_i = 0xcafecafe;
 
       dut->eval();
 
-      if(dut->result != 0x14537411) {
+      if(dut->result_o != 0x14537411) {
         pfail("Failed tb_xor\n");
-        pfail("  0xdeadbeef ^ 0xcafecafe : expected 0x14537411, got 0x%x\n", dut->result);
+        pfail("  0xdeadbeef ^ 0xcafecafe : expected 0x14537411, got 0x%x\n", dut->result_o);
         success = 0;
       }
     case 1:
@@ -316,15 +316,15 @@ int tb_sra(Valu * dut) {
   switch(time) {
     case 0:
       dut->op_i = OP_SR;
-      dut->alt_op = 1;
-      dut->operand1 = -0x8;
-      dut->operand2 = 0x2;
+      dut->alt_op_i = 1;
+      dut->operand1_i = -0x8;
+      dut->operand2_i = 0x2;
 
       dut->eval();
 
-      if(dut->result != -0x2) {
+      if(dut->result_o != -0x2) {
         pfail("Failed tb_sra\n");
-        pfail("  -0x8 >>> 0x2 : expected -0x2, got 0x%x\n", dut->result);
+        pfail("  -0x8 >>> 0x2 : expected -0x2, got 0x%x\n", dut->result_o);
         success = 0;
       }
     case 1:
@@ -344,15 +344,15 @@ int tb_srl(Valu * dut) {
   switch(time) {
     case 0:
       dut->op_i = OP_SR;
-      dut->alt_op = 0;
-      dut->operand1 = 0x8;
-      dut->operand2 = 0x2;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 0x8;
+      dut->operand2_i = 0x2;
 
       dut->eval();
 
-      if(dut->result != 0x2) {
+      if(dut->result_o != 0x2) {
         pfail("Failed tb_srl\n");
-        pfail("  0x8 >> 0x2 : expected 0x2, got 0x%x\n", dut->result);
+        pfail("  0x8 >> 0x2 : expected 0x2, got 0x%x\n", dut->result_o);
         success = 0;
       }
     case 1:
@@ -372,15 +372,15 @@ int tb_or(Valu * dut) {
   switch(time) {
     case 0:
       dut->op_i = OP_OR;
-      dut->alt_op = 0;
-      dut->operand1 = 0xF0F0F0F0;
-      dut->operand2 = 0x0F0F0F0F;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 0xF0F0F0F0;
+      dut->operand2_i = 0x0F0F0F0F;
 
       dut->eval();
 
-      if(dut->result != 0xFFFFFFFF) {
+      if(dut->result_o != 0xFFFFFFFF) {
         pfail("Failed tb_or\n");
-        pfail("  0xF0F0F0F0 | 0x0F0F0F0F : expected 0xFFFFFFFF, got 0x%x\n", dut->result);
+        pfail("  0xF0F0F0F0 | 0x0F0F0F0F : expected 0xFFFFFFFF, got 0x%x\n", dut->result_o);
         success = 0;
       }
     case 1:
@@ -400,15 +400,15 @@ int tb_and(Valu * dut) {
   switch(time) {
     case 0:
       dut->op_i = OP_AND;
-      dut->alt_op = 0;
-      dut->operand1 = 0xFFFF0000;
-      dut->operand2 = 0x000F0000;
+      dut->alt_op_i = 0;
+      dut->operand1_i = 0xFFFF0000;
+      dut->operand2_i = 0x000F0000;
 
       dut->eval();
 
-      if(dut->result != 0x000F0000) {
+      if(dut->result_o != 0x000F0000) {
         pfail("Failed tb_and\n");
-        pfail("  0xFFFF0000 & 0x000F0000 : expected 0x000F0000, got 0x%x\n", dut->result);
+        pfail("  0xFFFF0000 & 0x000F0000 : expected 0x000F0000, got 0x%x\n", dut->result_o);
         success = 0;
       }
     case 1:

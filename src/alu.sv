@@ -24,44 +24,44 @@
 module alu (
   input   logic[2:0]   op_i,
   // funct7 field used for SUB and SRA operations
-  input   logic        alt_op,
-  input   logic[31:0]  operand1,
-  input   logic[31:0]  operand2,
-  output  logic[31:0]  result
+  input   logic        alt_op_i,
+  input   logic[31:0]  operand1_i,
+  input   logic[31:0]  operand2_i,
+  output  logic[31:0]  result_o
 );
 import riscv_pkg::*;
 
 always_comb begin
   case (op_i)
     F3_ALU_ADD:   begin
-      if (alt_op) // SUB
-        result = operand1 - operand2;
+      if (alt_op_i) // SUB
+        result_o = operand1_i - operand2_i;
       else        // ADD
-        result = operand1 + operand2;
+        result_o = operand1_i + operand2_i;
       end
     F3_ALU_SLL:   begin
-      result = operand1 << operand2;
+      result_o = operand1_i << operand2_i;
       end
     F3_ALU_SLT:   begin
-      result = $signed(operand1) < $signed(operand2) ? 1 : 0;
+      result_o = $signed(operand1_i) < $signed(operand2_i) ? 1 : 0;
       end
     F3_ALU_SLTU:  begin
-      result = operand1 < operand2 ? 1 : 0;
+      result_o = operand1_i < operand2_i ? 1 : 0;
       end
     F3_ALU_XOR:   begin
-      result = operand1 ^ operand2;
+      result_o = operand1_i ^ operand2_i;
       end
     F3_ALU_SR:    begin
-      if (alt_op) // SRA
-        result = $signed(operand1) >>> operand2;
+      if (alt_op_i) // SRA
+        result_o = $signed(operand1_i) >>> operand2_i;
       else        // SRL
-        result = operand1 >> operand2;
+        result_o = operand1_i >> operand2_i;
       end
     F3_ALU_OR:    begin
-      result = operand1 | operand2;
+      result_o = operand1_i | operand2_i;
       end
     F3_ALU_AND:   begin
-      result = operand1 & operand2;
+      result_o = operand1_i & operand2_i;
       end
   endcase
 end

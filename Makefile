@@ -31,12 +31,12 @@ SRC = src/rv32i.sv \
 			src/alu.sv \
 
 top_module = rv32i
-MODULES = regfile alu
+MODULES = pc fetch regfile alu loadstore
 
 VERILATOR_OPTS = -Wall --cc --trace --Wno-unused
 
 all:
-	verilator --lint-only -Wall ${SRC} --top-module ${top_module}
+	verilator --lint-only -Wall ${INCLUDE} ${SRC} --top-module ${top_module}
 
 build:
 	mkdir -p build

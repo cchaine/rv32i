@@ -23,20 +23,73 @@
 
 module rv32i (
   input   logic         clk_i,
-  input   logic         rst_ni,
+  input   logic         rst_i
 );
-  logic  [4:0]    regfile_waddr = '0;
-  logic  [4:0]    regfile_raddr = '0;
-  logic           regfile_write = 0;
-  logic  [31:0]   regfile_wdata = '0;
+  logic[31:0]  pc_pc;
+
+  logic[31:0]  fetch_pc            =  '0;
+  logic[31:0]  fetch_instruction;
+  
+  logic        regfile_write       =   0;
+  logic[4:0]   regfile_waddr       =  '0;
+  logic[31:0]  regfile_wdata       =  '0;
+  logic[4:0]   regfile_raddra      =  '0;
+  logic[4:0]   regfile_raddrb      =  '0;
+  logic[31:0]  regfile_rdataa      =  '0;
+  logic[31:0]  regfile_rdatab      =  '0;
+  
+  logic[2:0]   alu_op              =  '0;
+  logic        alu_alt_op          =   0;
+  logic[31:0]  alu_operand1        =  '0;
+  logic[31:0]  alu_operand2        =  '0;
+  logic[31:0]  alu_result;
+  
+  logic        loadstore_write     =   0;
+  logic[31:0]  loadstore_addr      =  '0;
+  logic[31:0]  loadstore_wdata     =  '0;
+  logic[31:0]  loadstore_rdata;
+
+  pc #(
+    .START_ADDRESS ( 32'h0 )
+  ) inst_pc (
+    .clk_i  (  clk_i  ),
+    .rst_i  (  rst_i  ),
+    .pc_o   (  pc_pc  )
+  );
+
+  fetch #(
+    .MEMORY_FILE ( "" )
+  ) inst_fetch (
+    .clk_i          (  clk_i                ),
+    .pc_i           (  fetch_pc             ),
+    .instruction_o  (  fetch_instruction_o  ),
+  );
   
   regfile inst_regfile (
-    .clk_i    (clk_i),
-    .rst_ni   (rst_ni),
-    .waddr_i  (regfile_waddr),
-    .raddr_i  (regfile_raddr),
-    .write    (regfile_write),
-    .wdata_i  (regfile_wdata),
-    .rdata_o  (regfile_rdata_o)
+    .clk_i     (  clk_i           ),
+    .rst_i     (  rst_i           ),
+    .write_i   (  regfile_write   ),
+    .waddr_i   (  regfile_waddr   ),
+    .wdata_i   (  regfile_wdata   ),
+    .raddra_i  (  regfile_raddra  ),
+    .rdataa_o  (  regfile_rdataa  ),
+    .raddrb_i  (  regfile_raddrb  ),
+    .rdatab_o  (  regfile_rdatab  )
+  );
+
+  alu inst_alu (
+    .op_i        (  alu_op        ),
+    .alt_op_i    (  alu_alt_op    ),
+    .operand1_i  (  alu_operand1  ),
+    .operand2_i  (  alu_operand2  ),
+    .result_o    (  alu_result    )
+  );
+
+  loadstore inst_loadstore (
+    .clk_i    (  clk_i              ),
+    .write_i  (  loadstore_write    ),
+    .addr_i   (  loadstore_addr_i   ),
+    .wdata_i  (  loadstore_wdata_i  ),
+    .rdata_o  (  loadstore_rdata_o  )
   );
 endmodule // rv32i
