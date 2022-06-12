@@ -22,7 +22,6 @@
  */
 
 module decode (
-  input logic clk_i,
   input logic [31:0] instruction_i
 );
 

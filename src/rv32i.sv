@@ -29,6 +29,8 @@ module rv32i (
 
   logic[31:0]  fetch_pc            =  '0;
   logic[31:0]  fetch_instruction;
+
+  logic[31:0]  decode_instruction  =  '0;
   
   logic        regfile_write       =   0;
   logic[4:0]   regfile_waddr       =  '0;
@@ -64,6 +66,10 @@ module rv32i (
     .pc_i           (  fetch_pc             ),
     .instruction_o  (  fetch_instruction_o  ),
   );
+
+  decode inst_decode (
+    .instruction_i  (  decode_instruction  ),
+  );
   
   regfile inst_regfile (
     .clk_i     (  clk_i           ),
@@ -92,4 +98,5 @@ module rv32i (
     .wdata_i  (  loadstore_wdata_i  ),
     .rdata_o  (  loadstore_rdata_o  )
   );
+
 endmodule // rv32i
