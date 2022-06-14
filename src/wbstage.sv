@@ -21,29 +21,8 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module rv32i (
-  input   logic         clk_i,
-  input   logic         rst_i
+module wbstage (
+  input   logic        clk_i
 );
-  logic[31:0] instruction;
 
-  ifstage inst_ifstage (
-    .clk_i ( clk_i ),
-    .rst_i ( rst_i ),
-    .instruction_o ( instruction )
-  );
-
-  idstage inst_idstage (
-    .clk_i ( clk_i ),
-    .instruction_i ( instruction )
-  );
-
-  exstage inst_exstage (
-
-  );
-
-  wbstage inst_wbstage (
-  
-  );
-
-endmodule // rv32i
+endmodule // wbstage

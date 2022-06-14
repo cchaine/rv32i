@@ -20,3 +20,22 @@
  * You should have received a copy of the GNU General Public License
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+module ifstage (
+  input   logic        clk_i,
+  input   logic        rst_i,
+  output  logic[31:0]  instruction_o
+);
+  logic[31:0] pc;
+
+  pc inst_pc (
+    .clk_i  (  clk_i  ),
+    .rst_i  (  rst_i  ),
+    .pc_o   (  pc   )
+  );
+
+  imem inst_imem (
+    .pc_i           (  pc             ),
+    .instruction_o  (  instruction_o  )
+  );
+endmodule // ifstage

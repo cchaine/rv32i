@@ -21,22 +21,22 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module fetch #(
-  string MEMORY_FILE = "../tb/tb_fetch.mem" 
-)(
-  input   logic        clk_i,
-  input   logic [31:0] pc_i,
-  output  logic [31:0] instruction_o
+module exstage (
+  input  logic        clk_i,
+  input  logic[2:0]   alu_op_i,
+  input  logic        alu_alt_op_i,
+  input  logic[31:0]  operand1_i,
+  input  logic[31:0]  operand2_i,
+  input  logic[4:0]   rd_i
 );
+  logic[31:0] result;
 
-logic [31:0] imem [4096];
+  alu inst_alu (
+    .op_i ( alu_op_i ),
+    .alt_op_i ( alu_alt_op_i ),
+    .operand1_i ( operand1_i ),
+    .operand2_i ( operand2_i ),
+    .result_o ( result )
+  );
 
-always_ff @(posedge clk_i) begin
-  instruction_o <= imem[pc_i[11:0]];
-end
-
-initial begin 
-  $readmemh(MEMORY_FILE, imem); 
-end
-
-endmodule // fetch
+endmodule // exstage

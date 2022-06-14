@@ -25,29 +25,33 @@ PROJECT_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 SRC_DIR = src
 TB_DIR = tb
+
 INCLUDE = include/riscv_pkg.sv 
-SRC = src/rv32i.sv \
-			src/regfile.sv \
-			src/alu.sv \
+INCLUDE := $(addprefix $(PROJECT_ROOT), $(INCLUDE))
 
-top_module = rv32i
-MODULES = pc fetch regfile alu loadstore
+SRC = $(shell find $(SRC_DIR) -name '*.sv')
+SRC := $(addprefix $(PROJECT_ROOT), $(SRC))
 
-VERILATOR_OPTS = -Wall --cc --trace --Wno-unused
+TOP_MODULE = rv32i
+TEST_MODULES = pc regfile alu loadstore
+TEST_STAGES = ifstage
+TESTS = ${TEST_MODULES} ${TEST_STAGES}
+
+VERILATOR_OPTS = -Wall --cc --trace -Wno-unused -Wno-pinmissing
 
 all:
-	verilator --lint-only -Wall ${INCLUDE} ${SRC} --top-module ${top_module}
+	verilator --lint-only -Wall ${INCLUDE} ${SRC} --top-module ${TOP_MODULE}
 
 build:
 	mkdir -p build
 
-$(MODULES): build
+$(TESTS): build
 	@echo "Simulating module $@"
-	verilator ${VERILATOR_OPTS} --Mdir build/ --exe ${PROJECT_ROOT}${INCLUDE} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp ${PROJECT_ROOT}${SRC_DIR}/$@.sv --prefix V$@ -CFLAGS -I${PROJECT_ROOT}/tb/lib
+	verilator ${VERILATOR_OPTS} --Mdir build/ --exe ${INCLUDE} ${SRC} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp --top-module $@ --prefix V$@ -CFLAGS -I${PROJECT_ROOT}/tb/lib
 	make -C build -f V$@.mk V$@
 
-sim : $(MODULES)
-	echo "$(MODULES)"
+sim : $(TESTS)
+	echo "$(TESTS)"
 
 clean:
 	rm -rf build

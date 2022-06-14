@@ -21,29 +21,39 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module rv32i (
-  input   logic         clk_i,
-  input   logic         rst_i
+module idstage (
+  input   logic        clk_i,
+  input   logic[31:0]  instruction_i,
+  output  logic[2:0]   alu_op_o,
+  output  logic        alu_alt_op_o,
+  output  logic[4:0]   rd_o,
+  output  logic[31:0]  imm_o,
+  output  logic        is_imm_o
 );
-  logic[31:0] instruction;
+  import riscv_pkg::*;
 
-  ifstage inst_ifstage (
-    .clk_i ( clk_i ),
-    .rst_i ( rst_i ),
-    .instruction_o ( instruction )
-  );
+  logic[4:0]  opcode;
+  logic[2:0]  f3;
+  logic[4:0]  rd;
+  logic[4:0]  rs1;
+  logic[4:0]  rs2;
 
-  idstage inst_idstage (
-    .clk_i ( clk_i ),
-    .instruction_i ( instruction )
-  );
-
-  exstage inst_exstage (
-
-  );
-
-  wbstage inst_wbstage (
-  
-  );
-
-endmodule // rv32i
+  always_ff @(posedge clk_i) begin
+    opcode <= instruction_i[6:2];
+    case(opcode)
+      OP_LOAD : begin
+        rd       <=  instruction_i[11:7];
+        rs1      <=  instruction_i[19:15];
+        imm_o    <=  { 20'b0, instruction_i[11:0] };
+        is_imm_o <=  1;
+      end
+      default: begin
+        alu_op_o <= '0;
+        alu_alt_op_o <= 0;
+        rd_o <= '0;
+        imm_o <= '0;
+        is_imm_o <= 0;
+      end
+    endcase 
+  end
+endmodule // idstage

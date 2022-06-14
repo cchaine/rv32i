@@ -21,8 +21,21 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module decode (
-  input logic [31:0] instruction_i
+module imem #(
+  string MEMORY_FILE = "../tb/tb_ifstage.mem"
+)(
+  input   logic [31:0] pc_i,
+  output  logic [31:0] instruction_o
 );
 
-endmodule // decode
+logic [31:0] mem [4096];
+
+always_comb begin
+  instruction_o = mem[pc_i[13:2]];
+end
+
+initial begin 
+  $readmemh(MEMORY_FILE, mem); 
+end
+
+endmodule // imem

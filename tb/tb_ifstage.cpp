@@ -28,16 +28,23 @@
 
 #include <term.h>
 
-#include "Vfetch.h"
+#include "Vifstage.h"
 
-typedef int (*action_t)(Vfetch *);
+typedef int (*action_t)(Vifstage *);
 
-int wait(Vfetch * dut) {
+int reset(Vifstage * dut) {
   static int time = 0;
   if(dut->clk_i) {
     switch(time) {
       case 0:
       case 1:
+      case 2:
+      case 3:
+      case 4:
+        dut->rst_i = 1;
+        break;
+      case 5:
+        dut->rst_i = 0;
         return 1;
     }
     time += 1;
@@ -45,7 +52,7 @@ int wait(Vfetch * dut) {
   return 0;
 }
 
-int tb_fetch(Vfetch * dut) {
+int tb_ifstage(Vifstage * dut) {
   static int time = 0;
   static int success = 1;
   if(dut->clk_i) {
@@ -65,20 +72,17 @@ int tb_fetch(Vfetch * dut) {
       case 12:
       case 13:
       case 14:
-      case 15:
-        dut->pc_i = time;
-
         dut->eval();
 
-        if(dut->instruction_o != time + 1) {
-          pfail("Failed tb_fetch\n");
-          pfail("  expected 0x%x, got 0x%x\n", time+1, dut->instruction_o);
+        if(dut->instruction_o != time + 2) {
+          pfail("Failed tb_ifstage\n");
+          pfail("  expected 0x%x, got 0x%x\n", time+2, dut->instruction_o);
           success = 0;
         }
         break;
       case 16:
         if(success) {
-          psuccess("Success tb_fetch !\n");
+          psuccess("Success tb_ifstage !\n");
         }
         return 1;
     }
@@ -92,15 +96,15 @@ vluint64_t sim_time = 0;
 
 // List of tests to execute
 #define num_actions 2
-action_t actions[] = { wait, tb_fetch };
+action_t actions[] = { reset, tb_ifstage };
 
 int main(int argc, char ** argv, char ** env) {
-  Vfetch *dut = new Vfetch;
+  Vifstage *dut = new Vifstage;
 
   Verilated::traceEverOn(true);
   VerilatedVcdC *m_trace = new VerilatedVcdC;
   dut->trace(m_trace, 5);
-  m_trace->open("fetch.vcd");
+  m_trace->open("ifstage.vcd");
 
   action_t * current_action = actions;
   // We are done when there are no more actions and the clk is low 
