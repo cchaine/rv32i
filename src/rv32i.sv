@@ -36,10 +36,18 @@ module rv32i (
   idstage inst_idstage (
     .clk_i ( clk_i ),
     .instruction_i ( instruction )
+    .alu_op_o ( id_alu_op_o ),
+    .alu_alt_op_o ( id_alu_alt_op_o ),
+    .reg_raddra_o ( id_reg_addr_a_o ),
+    .reg_raddrb_o ( id_reg_addr_b_o ),
+    .imm_o ( id_imm ),
+    .is_imm_o ( id_is_imm )
   );
 
   exstage inst_exstage (
-
+    .alu_op_i ( ),
+    .operand1_i ( ),
+    .operand2_i ( ),
   );
 
   wbstage inst_wbstage (
