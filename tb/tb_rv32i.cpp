@@ -28,8 +28,33 @@
 
 #include "Vrv32i.h"
 
-#define MAX_SIM_TIME 20
 vluint64_t sim_time = 0;
+
+int tb_reset(Vrv32i * dut) {
+  static int time = 0;
+  static int success = 1;
+  if(dut->clk_i) {
+    switch(time) {
+      case 0: 
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+        dut->rst_i = 1;
+        break;
+      case 5:
+        dut->rst_i = 0;
+        return 1;
+    }
+
+    time += 1;
+  }
+  return 0;
+}
+
+// List of tests to execute
+#define num_actions 1
+action_t actions[] = { reset };
 
 int main(int argc, char ** argv, char ** env) {
   Vrv32i *dut = new Vrv32i;
@@ -37,23 +62,21 @@ int main(int argc, char ** argv, char ** env) {
   Verilated::traceEverOn(true);
   VerilatedVcdC *m_trace = new VerilatedVcdC;
   dut->trace(m_trace, 5);
-  m_trace->open("waveform.vcd");
+  m_trace->open("rv32i.vcd");
 
-  dut->rst_ni = 0;
-  while(sim_time < MAX_SIM_TIME) {
-    // Reset
-    if(sim_time > 5) {
-      dut->rst_ni = 1;
-    }
-
+  action_t * current_action = actions;
+  // We are done when there are no more actions and the clk is low 
+  while(current_action < (actions + num_actions)) {
+    // Clock
     dut->clk_i ^= 1;
 
-    dut->eval();
-
-    if(dut->clk_i == 1 && dut->rst_ni == 1) {
-      printf("ctr = %d\n", dut->ctr_o);
+    // Perform actions 
+    int current_done = (*current_action)(dut);
+    if(current_done) {
+      current_action += 1;
     }
 
+    dut->eval();
     m_trace->dump(sim_time);
     sim_time++;
   }

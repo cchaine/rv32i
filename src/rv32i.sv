@@ -48,11 +48,11 @@ module rv32i (
 
   idstage inst_idstage (
     .clk_i          (  clk_i          ),
-    .instruction_i  (  instruction    )
+    .instruction_i  (  instruction    ),
     .alu_op_o       (  id_alu_op      ),
     .alu_alt_op_o   (  id_alu_alt_op  ),
-    .reg_raddra_o   (  id_reg_addra   ),
-    .reg_raddrb_o   (  id_reg_addrb   ),
+    .reg_raddra_o   (  id_reg_raddra   ),
+    .reg_raddrb_o   (  id_reg_raddrb   ),
     .imm_o          (  id_imm         ),
     .is_imm_o       (  id_is_imm      )
   );
@@ -80,10 +80,10 @@ module rv32i (
     .operand2_i    (  ex_operand2    ),
   );
   always_comb begin
-    ex_alu_op      =  id_alu_op,
-    ex_alu_alt_op  =  id_alu_alt_op,
+    ex_alu_op      =  id_alu_op;
+    ex_alu_alt_op  =  id_alu_alt_op;
     ex_operand1    =  reg_rdataa;
-    ex_operand2    =  id_is_imm ? id_imm : reg_datab;
+    ex_operand2    =  id_is_imm ? id_imm : reg_rdatab;
   end
 
   wbstage inst_wbstage (

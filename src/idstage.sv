@@ -25,10 +25,11 @@ module idstage (
   input   logic        clk_i,
   input   logic[31:0]  instruction_i,
   output  logic[2:0]   alu_op_o,
+  output  logic        alu_alt_op_o,
   output  logic[4:0]   reg_raddra_o,
-  output  logic[4:0]   reg_raddrb_o
+  output  logic[4:0]   reg_raddrb_o,
   output  logic[31:0]  imm_o,
-  output  logic        is_imm_o,
+  output  logic        is_imm_o
 );
   import riscv_pkg::*;
 
@@ -77,7 +78,7 @@ module idstage (
         imm[11:5]  <=  instruction_i[31:20];
       end
       // B-type instruction
-      OP_BRANCH:
+      OP_BRANCH: begin
         imm[11]    <=  instruction_i[7];
         imm[4:1]   <=  instruction_i[11:8];
         f3         <=  instruction_i[14:12];
@@ -85,6 +86,7 @@ module idstage (
         rs2        <=  instruction_i[24:20];
         imm[10:5]  <=  instruction_i[30:25];
         imm[12]    <=  instruction_i[31];
+      end
       // U-type instruction
       OP_LUI,
       OP_AUIPC: begin
@@ -98,15 +100,17 @@ module idstage (
         imm[11]     <=  instruction_i[20];
         imm[10:1]   <=  instruction_i[30:21];
         imm[20]     <=  instruction_i[31];
+      end
       // Fence instructions
-      OP_MISC_MEM:
+//      OP_MISC_MEM:
       // CSR instructions
-      OP_SYSTEM:
+//      OP_SYSTEM:
     endcase 
   end
 
   always_comb begin
     alu_op_o      =  f3;
+    alu_alt_op_o  = 0;
     reg_raddra_o  =  rs1;
     reg_raddrb_o  =  rs2;
     imm_o         =  imm;

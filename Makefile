@@ -33,24 +33,32 @@ SRC = $(shell find $(SRC_DIR) -name '*.sv')
 SRC := $(addprefix $(PROJECT_ROOT), $(SRC))
 
 TOP_MODULE = rv32i
-TEST_MODULES = pc regfile alu loadstore
-TEST_STAGES = ifstage
-TESTS = ${TEST_MODULES} ${TEST_STAGES}
+MODULES = ${TOP_MODULE} pc regfile alu loadstore ifstage 
 
-VERILATOR_OPTS = -Wall --cc --trace -Wno-unused -Wno-pinmissing
+VERILATOR_OPTS = --cc --trace
+VERILATOR_WARNINGS = -Wall -Wno-unused -Wno-pinmissing
 
 all:
-	verilator --lint-only -Wall ${INCLUDE} ${SRC} --top-module ${TOP_MODULE}
+	verilator \
+		--lint-only \
+		${VERILATOR_WARNINGS} \
+	 	${INCLUDE} ${SRC} \
+		--top-module ${TOP_MODULE}
 
 build:
 	mkdir -p build
 
-$(TESTS): build
+$(MODULES): build
 	@echo "Simulating module $@"
-	verilator ${VERILATOR_OPTS} --Mdir build/ --exe ${INCLUDE} ${SRC} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp --top-module $@ --prefix V$@ -CFLAGS -I${PROJECT_ROOT}/tb/lib
+	verilator \
+		${VERILATOR_OPTS} ${VERILATOR_WARNINGS} \
+		--Mdir build/ \
+		--exe ${INCLUDE} ${SRC} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp \
+		--top-module $@ --prefix V$@ \
+		-CFLAGS -I${PROJECT_ROOT}/tb/lib
 	make -C build -f V$@.mk V$@
 
-sim : $(TESTS)
+sim : $(MODULES)
 	echo "$(TESTS)"
 
 clean:
