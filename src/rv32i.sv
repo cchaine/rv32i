@@ -21,14 +21,15 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module rv32i (
+module rv32i import riscv_pkg::*; (
   input   logic         clk_i,
   input   logic         rst_i
 );
   logic[31:0]    if_id_instruction;
-  instruction_t  id_ex_instruction;
+  riscv_pkg::instruction_t  id_ex_instruction;
   logic[31:0]    reg_rdataa, reg_rdatab;
-  instruction_t  ex_wb_instruction;
+  riscv_pkg::instruction_t  ex_wb_instruction;
+  logic[31:0]    ex_result;
   logic          reg_write;
   logic[4:0]     reg_waddr;
   logic[31:0]    reg_wdata;
@@ -41,6 +42,7 @@ module rv32i (
 
   idstage inst_idstage (
     .clk_i          (  clk_i              ),
+    .rst_i          (  rst_i              ),
     .instruction_i  (  if_id_instruction  ),
     .instruction_o  (  id_ex_instruction  )
   );
@@ -48,9 +50,9 @@ module rv32i (
   regfile inst_regfile (
     .clk_i     (  clk_i                  ),
     .rst_i     (  rst_i                  ),
-    .write_i   (  0 ),
-    .waddr_i   (  '0 ),
-    .wdata_i   (  '0 ),
+    .write_i   (  reg_write ),
+    .waddr_i   (  reg_waddr ),
+    .wdata_i   (  reg_wdata ),
     .raddra_i  (  id_ex_instruction.rs1  ),
     .raddrb_i  (  id_ex_instruction.rs2  ),
     .rdataa_o  (  reg_rdataa             ),
@@ -59,15 +61,17 @@ module rv32i (
 
   exstage inst_exstage (
     .clk_i          (  clk_i              ),
+    .rst_i          (  rst_i              ),
     .instruction_i  (  id_ex_instruction  ),
     .reg_rdataa_i   (  reg_rdataa         ),
     .reg_rdatab_i   (  reg_rdatab         ),
     .result_o       (  ex_result          ),
-    .instruction_o  (  ex_wb_instruction  ),
+    .instruction_o  (  ex_wb_instruction  )
   );
 
   wbstage inst_wbstage (
-    .clk_i ( clk_i ),
+    .clk_i          (  clk_i              ),
+    .rst_i          (  rst_i              ),
     .instruction_i  (  ex_wb_instruction  ),
     .data_i         (  ex_result          ),
     .reg_write_o    (  reg_write          ),

@@ -28,9 +28,9 @@
 
 #include "Vrv32i.h"
 
-vluint64_t sim_time = 0;
+typedef int (*action_t)(Vrv32i*);
 
-int tb_reset(Vrv32i * dut) {
+int reset(Vrv32i * dut) {
   static int time = 0;
   static int success = 1;
   if(dut->clk_i) {
@@ -52,9 +52,23 @@ int tb_reset(Vrv32i * dut) {
   return 0;
 }
 
+int tb_wait(Vrv32i * dut) {
+  static int time = 0;
+  if(dut->clk_i) {
+    if(time == 10) {
+      return 1;
+    }
+    
+    time += 1;
+  }
+  return 0;
+}
+
+vluint64_t sim_time = 0;
+
 // List of tests to execute
-#define num_actions 1
-action_t actions[] = { reset };
+#define num_actions 2
+action_t actions[] = { reset, tb_wait };
 
 int main(int argc, char ** argv, char ** env) {
   Vrv32i *dut = new Vrv32i;

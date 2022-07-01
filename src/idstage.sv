@@ -23,19 +23,20 @@
 
 module idstage (
   input   logic          clk_i,
+  input   logic          rst_i,
   input   logic[31:0]    instruction_i,
-  output  instruction_t  instruction_o
+  output  riscv_pkg::instruction_t  instruction_o
 );
   import riscv_pkg::*;
 
-  instruction_t decoded_instr; 
+  riscv_pkg::instruction_t decoded_instr; 
 
   always_ff @(posedge clk_i) begin
     // Reset decoded instruction
     decoded_instr <= '0;
 
     decoded_instr.opcode <= instruction_i[6:2];
-    unique case(decoded_instr.opcode)
+    case(decoded_instr.opcode)
       // R-type instruction
       OP_ALU: begin
         decoded_instr.rd   <=  instruction_i[11:7];
@@ -60,7 +61,7 @@ module idstage (
         decoded_instr.f3         <=  instruction_i[14:12];
         decoded_instr.rs1        <=  instruction_i[19:15];
         decoded_instr.rs2        <=  instruction_i[24:20];
-        decoded_instr.imm[11:5]  <=  instruction_i[31:20];
+        decoded_instr.imm[11:5]  <=  instruction_i[31:25];
         decoded_instr.is_imm     <=  1;
       end
       // B-type instruction
@@ -88,16 +89,17 @@ module idstage (
         decoded_instr.imm[11]     <=  instruction_i[20];
         decoded_instr.imm[10:1]   <=  instruction_i[30:21];
         decoded_instr.imm[20]     <=  instruction_i[31];
-        decoded_instr.is_imm     <=  1;
+        decoded_instr.is_imm      <=  1;
       end
       // Fence instructions
-//      OP_MISC_MEM:
+      OP_MISC_MEM: begin end
       // CSR instructions
-//      OP_SYSTEM:
+      OP_SYSTEM: begin end
+      default: begin end
     endcase 
   end
 
   always_comb begin
-    instruction_o = decoded_instr;
+    instruction_o = rst_i ? '0 : decoded_instr;
   end
 endmodule // idstage

@@ -84,13 +84,15 @@ parameter  F3_SYSTEM_CSRRWI     =  3'b101;
 parameter  F3_SYSTEM_CSRRSI     =  3'b110;
 parameter  F3_SYSTEM_CSRRCI     =  3'b111;
 
-struct {
-  logic[2:0]   opcode;
+parameter  NOP_INSTRUCTION = 32'h13;
+
+typedef struct packed {
+  logic[4:0]   opcode;
   logic[2:0]   f3;
   logic[4:0]   rd;
   logic[4:0]   rs1;
   logic[4:0]   rs2;
-  logic[4:0]   f7;
+  logic[6:0]   f7;
   logic[31:0]  imm;
   logic        is_imm;
 } instruction_t;
