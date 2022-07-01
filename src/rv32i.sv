@@ -25,69 +25,53 @@ module rv32i (
   input   logic         clk_i,
   input   logic         rst_i
 );
-  logic[31:0] instruction;
-
-  logic[2:0] id_alu_op;
-  logic id_alu_alt_op;
-  logic[4:0] id_reg_raddra, id_reg_raddrb;
-  logic[31:0] id_imm;
-  logic id_is_imm;
-
-  logic[4:0] reg_raddra, reg_raddrb;
-  logic[31:0] reg_rdataa, reg_rdatab;
-
-  logic[2:0] ex_alu_op;
-  logic ex_alu_alt_op;
-  logic[31:0] ex_operand1, ex_operand2;
+  logic[31:0]    if_id_instruction;
+  instruction_t  id_ex_instruction;
+  logic[31:0]    reg_rdataa, reg_rdatab;
+  instruction_t  ex_wb_instruction;
+  logic          reg_write;
+  logic[4:0]     reg_waddr;
+  logic[31:0]    reg_wdata;
 
   ifstage inst_ifstage (
-    .clk_i ( clk_i ),
-    .rst_i ( rst_i ),
-    .instruction_o ( instruction )
+    .clk_i          (  clk_i              ),
+    .rst_i          (  rst_i              ),
+    .instruction_o  (  if_id_instruction  )
   );
 
   idstage inst_idstage (
-    .clk_i          (  clk_i          ),
-    .instruction_i  (  instruction    ),
-    .alu_op_o       (  id_alu_op      ),
-    .alu_alt_op_o   (  id_alu_alt_op  ),
-    .reg_raddra_o   (  id_reg_raddra   ),
-    .reg_raddrb_o   (  id_reg_raddrb   ),
-    .imm_o          (  id_imm         ),
-    .is_imm_o       (  id_is_imm      )
+    .clk_i          (  clk_i              ),
+    .instruction_i  (  if_id_instruction  ),
+    .instruction_o  (  id_ex_instruction  )
   );
 
   regfile inst_regfile (
-    .clk_i ( clk_i ),
-    .rst_i ( rst_i ),
-    .write_i ( ),
-    .waddr_i ( ),
-    .wdata_i ( ),
-    .raddra_i ( reg_raddra ),
-    .raddrb_i ( reg_raddrb ),
-    .rdataa_o ( reg_rdataa ),
-    .rdatab_o ( reg_rdatab )
+    .clk_i     (  clk_i                  ),
+    .rst_i     (  rst_i                  ),
+    .write_i   (  0 ),
+    .waddr_i   (  '0 ),
+    .wdata_i   (  '0 ),
+    .raddra_i  (  id_ex_instruction.rs1  ),
+    .raddrb_i  (  id_ex_instruction.rs2  ),
+    .rdataa_o  (  reg_rdataa             ),
+    .rdatab_o  (  reg_rdatab             )
   );
-  always_comb begin
-    reg_raddra = id_reg_raddra;
-    reg_raddrb = id_reg_raddrb;
-  end
 
   exstage inst_exstage (
-    .alu_op_i      (  ex_alu_op      ),
-    .alu_alt_op_i  (  ex_alu_alt_op  ),
-    .operand1_i    (  ex_operand1    ),
-    .operand2_i    (  ex_operand2    ),
+    .clk_i          (  clk_i              ),
+    .instruction_i  (  id_ex_instruction  ),
+    .reg_rdataa_i   (  reg_rdataa         ),
+    .reg_rdatab_i   (  reg_rdatab         ),
+    .result_o       (  ex_result          ),
+    .instruction_o  (  ex_wb_instruction  ),
   );
-  always_comb begin
-    ex_alu_op      =  id_alu_op;
-    ex_alu_alt_op  =  id_alu_alt_op;
-    ex_operand1    =  reg_rdataa;
-    ex_operand2    =  id_is_imm ? id_imm : reg_rdatab;
-  end
 
   wbstage inst_wbstage (
-  
+    .clk_i ( clk_i ),
+    .instruction_i  (  ex_wb_instruction  ),
+    .data_i         (  ex_result          ),
+    .reg_write_o    (  reg_write          ),
+    .reg_waddr_o    (  reg_waddr          ),
+    .reg_wdata_o    (  reg_wdata          )
   );
-
 endmodule // rv32i

@@ -22,7 +22,18 @@
  */
 
 module wbstage (
-  input   logic        clk_i
+  input   logic          clk_i,
+  input   instruction_t  instruction_i,
+  input   logic[31:0]    data_i,
+  output  logic          reg_write_o,
+  output  logic[4:0]     reg_waddr_o,
+  output  logic[31:0]    reg_wdata_o
 );
+
+  always_comb begin
+    reg_write_o = 0;
+    reg_waddr_o = '0;
+    reg_wdata_o = '0;
+  end
 
 endmodule // wbstage

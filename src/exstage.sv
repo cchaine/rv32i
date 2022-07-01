@@ -22,21 +22,36 @@
  */
 
 module exstage (
-  input  logic        clk_i,
-  input  logic[2:0]   alu_op_i,
-  input  logic        alu_alt_op_i,
-  input  logic[31:0]  operand1_i,
-  input  logic[31:0]  operand2_i,
-  input  logic[4:0]   rd_i
+  input   logic          clk_i,
+  input   instruction_t  instruction_i,
+  input   logic[31:0]    reg_rdataa_i,
+  input   logic[31:0]    reg_rdatab_i,
+  output  logic[31:0]    result_o,
+  output  instruction_t  instruction_o
 );
-  logic[31:0] result;
+  logic[2:0]   alu_op;
+  logic        alu_alt_op;
+  logic[31:0]  operand1, operand2;
+  logic[31:0]  result;
 
   alu inst_alu (
-    .op_i ( alu_op_i ),
-    .alt_op_i ( alu_alt_op_i ),
-    .operand1_i ( operand1_i ),
-    .operand2_i ( operand2_i ),
-    .result_o ( result )
+    .op_i        (  alu_op_i      ),
+    .alt_op_i    (  alu_alt_op_i  ),
+    .operand1_i  (  operand1_i    ),
+    .operand2_i  (  operand2_i    ),
+    .result_o    (  result        )
   );
 
+  always_comb begin
+    alu_op = instruction_i.f3;
+    alu_alt_op = 0;
+    operand1 = reg_rdataa;
+    operand2 = instruction_i.is_imm ? instruction_i.imm : reg_rdatab;
+
+    result_o = result;
+  end
+
+  always_ff @(posedge clk_i) begin
+    instruction_o = instruction_i;
+  end
 endmodule // exstage
