@@ -21,9 +21,7 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module imem #(
-  string MEMORY_FILE = "../tb/tb_ifstage.mem"
-)(
+module imem (
   input   logic [31:0] pc_i,
   output  logic [31:0] instruction_o
 );
@@ -34,8 +32,11 @@ always_comb begin
   instruction_o = mem[pc_i[13:2]];
 end
 
-initial begin 
-  $readmemh(MEMORY_FILE, mem); 
-end
+// This task is used by Verilator to load
+// the memory during test
+export "DPI-C" task loadmem;
+task loadmem (input string path);
+  $readmemh(path, mem); 
+endtask;
 
 endmodule // imem

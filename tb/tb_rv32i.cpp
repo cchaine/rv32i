@@ -25,25 +25,32 @@
 #include <stdlib.h>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
+#include <svdpi.h>
 
 #include "Vrv32i.h"
 
 typedef int (*action_t)(Vrv32i*);
+typedef struct {
+  std::string name;
+  action_t run;
+} test_t;
 
-int reset(Vrv32i * dut) {
+int tb_nop(Vrv32i * dut) {
   static int time = 0;
-  static int success = 1;
   if(dut->clk_i) {
     switch(time) {
-      case 0: 
+      case 0:
+        dut->rst_i = 1;
+        dut->loadmem("../tb/mem/tb_nop.mem");
+        break;
       case 1:
+        dut->rst_i = 0;
+        break;
       case 2:
       case 3:
       case 4:
-        dut->rst_i = 1;
-        break;
       case 5:
-        dut->rst_i = 0;
+      case 6:
         return 1;
     }
 
@@ -52,23 +59,13 @@ int reset(Vrv32i * dut) {
   return 0;
 }
 
-int tb_wait(Vrv32i * dut) {
-  static int time = 0;
-  if(dut->clk_i) {
-    if(time == 10) {
-      return 1;
-    }
-    
-    time += 1;
-  }
-  return 0;
-}
-
 vluint64_t sim_time = 0;
 
 // List of tests to execute
-#define num_actions 2
-action_t actions[] = { reset, tb_wait };
+#define num_tests 1
+test_t tests[] = {
+  {"nop",    tb_nop}
+};
 
 int main(int argc, char ** argv, char ** env) {
   Vrv32i *dut = new Vrv32i;
@@ -76,26 +73,41 @@ int main(int argc, char ** argv, char ** env) {
   Verilated::traceEverOn(true);
   VerilatedVcdC *m_trace = new VerilatedVcdC;
   dut->trace(m_trace, 5);
-  m_trace->open("rv32i.vcd");
 
-  action_t * current_action = actions;
-  // We are done when there are no more actions and the clk is low 
-  while(current_action < (actions + num_actions)) {
-    // Clock
+  // Set scope for DPI interactions
+  const svScope scope = svGetScopeFromName("TOP.rv32i.inst_ifstage.inst_imem");
+  assert(scope);
+  svSetScope(scope);
+
+  test_t * current_test = tests;
+  std::string trace_name;
+  // We are done when there are no more actions
+  while(current_test < (tests + num_tests)) {
+    // Open the VCD trace if not already open
+    if(!m_trace->isOpen()) {
+      trace_name = "rv32i_" + current_test->name + ".vcd";
+      m_trace->open(trace_name.c_str());
+    }
+
+    // Update Clock
     dut->clk_i ^= 1;
 
     // Perform actions 
-    int current_done = (*current_action)(dut);
-    if(current_done) {
-      current_action += 1;
-    }
+    int current_done = current_test->run(dut);
 
+    // Update the trace
     dut->eval();
     m_trace->dump(sim_time);
     sim_time++;
+
+    // Close the trace if test is over
+    if(current_done) {
+      m_trace->close();
+      current_test += 1;
+    }
   }
 
-  m_trace->close();
+  dut->final();
   delete dut;
   exit(EXIT_SUCCESS);
 }

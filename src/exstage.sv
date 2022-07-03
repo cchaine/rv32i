@@ -23,6 +23,7 @@
 
 module exstage (
   input   logic          clk_i,
+  input   logic          rst_i,
   input   riscv_pkg::instruction_t  instruction_i,
   input   logic[31:0]    reg_rdataa_i,
   input   logic[31:0]    reg_rdatab_i,

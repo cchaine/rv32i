@@ -22,17 +22,17 @@
  */
 
 module rv32i import riscv_pkg::*; (
-  input   logic         clk_i,
-  input   logic         rst_i
+  input logic clk_i,
+  input logic rst_i
 );
-  logic[31:0]    if_id_instruction;
+  logic[31:0]               if_id_instruction;
   riscv_pkg::instruction_t  id_ex_instruction;
-  logic[31:0]    reg_rdataa, reg_rdatab;
+  logic[31:0]               reg_rdataa, reg_rdatab;
   riscv_pkg::instruction_t  ex_wb_instruction;
-  logic[31:0]    ex_result;
-  logic          reg_write;
-  logic[4:0]     reg_waddr;
-  logic[31:0]    reg_wdata;
+  logic[31:0]               ex_result;
+  logic                     reg_write;
+  logic[4:0]                reg_waddr;
+  logic[31:0]               reg_wdata;
 
   ifstage inst_ifstage (
     .clk_i          (  clk_i              ),

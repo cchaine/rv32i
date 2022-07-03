@@ -23,6 +23,7 @@
 
 module wbstage (
   input   logic          clk_i,
+  input   logic          rst_i,
   input   riscv_pkg::instruction_t  instruction_i,
   input   logic[31:0]    data_i,
   output  logic          reg_write_o,

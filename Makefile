@@ -55,7 +55,7 @@ $(MODULES): build
 		--Mdir build/ \
 		--exe ${INCLUDE} ${SRC} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp \
 		--top-module $@ --prefix V$@ \
-		-CFLAGS -I${PROJECT_ROOT}/tb/lib
+		-CFLAGS -I${PROJECT_ROOT}/tb/lib -CFLAGS -g
 	make -C build -f V$@.mk V$@
 
 sim : $(MODULES)

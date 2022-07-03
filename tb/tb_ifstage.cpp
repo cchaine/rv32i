@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
+#include <svdpi.h>
 
 #include <term.h>
 
@@ -58,6 +59,7 @@ int tb_ifstage(Vifstage * dut) {
   if(dut->clk_i) {
     switch(time) {
       case 0: 
+        dut->loadmem("../tb/mem/tb_ifstage.mem");
       case 1:
       case 2:
       case 3:
@@ -106,6 +108,11 @@ int main(int argc, char ** argv, char ** env) {
   dut->trace(m_trace, 5);
   m_trace->open("ifstage.vcd");
 
+  // Set scope for DPI interactions
+  const svScope scope = svGetScopeFromName("TOP.ifstage.inst_imem");
+  assert(scope);
+  svSetScope(scope);
+
   action_t * current_action = actions;
   // We are done when there are no more actions and the clk is low 
   while(current_action < (actions + num_actions)) {
@@ -124,6 +131,7 @@ int main(int argc, char ** argv, char ** env) {
   }
 
   m_trace->close();
+  dut->final();
   delete dut;
   exit(EXIT_SUCCESS);
 }

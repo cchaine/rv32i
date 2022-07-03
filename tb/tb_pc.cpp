@@ -156,6 +156,7 @@ int main(int argc, char ** argv, char ** env) {
   }
 
   m_trace->close();
+  dut->final();
   delete dut;
   exit(EXIT_SUCCESS);
 }
