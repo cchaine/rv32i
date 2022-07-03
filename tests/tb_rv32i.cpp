@@ -41,7 +41,7 @@ int tb_nop(Vrv32i * dut) {
     switch(time) {
       case 0:
         dut->rst_i = 1;
-        dut->loadmem("../tb/mem/tb_nop.mem");
+        dut->loadmem("../tests/mem/tb_nop.mem");
         break;
       case 1:
         dut->rst_i = 0;

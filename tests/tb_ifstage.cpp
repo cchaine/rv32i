@@ -59,7 +59,7 @@ int tb_ifstage(Vifstage * dut) {
   if(dut->clk_i) {
     switch(time) {
       case 0: 
-        dut->loadmem("../tb/mem/tb_ifstage.mem");
+        dut->loadmem("../tests/mem/tb_ifstage.mem");
       case 1:
       case 2:
       case 3:

@@ -24,7 +24,7 @@
 PROJECT_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 SRC_DIR = src
-TB_DIR = tb
+TB_DIR = tests
 
 INCLUDE = include/riscv_pkg.sv 
 INCLUDE := $(addprefix $(PROJECT_ROOT), $(INCLUDE))
@@ -55,7 +55,7 @@ $(MODULES): build
 		--Mdir build/ \
 		--exe ${INCLUDE} ${SRC} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp \
 		--top-module $@ --prefix V$@ \
-		-CFLAGS -I${PROJECT_ROOT}/tb/lib -CFLAGS -g
+		-CFLAGS -I${PROJECT_ROOT}/tests/lib -CFLAGS -g
 	make -C build -f V$@.mk V$@
 
 sim : $(MODULES)
