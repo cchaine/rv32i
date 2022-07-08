@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
+#include <svdpi.h>
 
 #include "Vregfile.h"
 

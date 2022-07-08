@@ -51,4 +51,11 @@ module regfile (
     end
   end
 
+// This task is used by Verilator to get
+// the content of the registers
+export "DPI-C" task getreg;
+task getreg(input bit[4:0] addr, output bit[31:0] out);
+  out = regs[addr];
+endtask;
+
 endmodule //regfile
