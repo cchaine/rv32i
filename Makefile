@@ -26,7 +26,7 @@ PROJECT_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SRC_DIR = src
 TB_DIR = tests
 
-INCLUDE = include/riscv_pkg.sv 
+INCLUDE = $(SRC_DIR)/include/riscv_pkg.svh
 INCLUDE := $(addprefix $(PROJECT_ROOT), $(INCLUDE))
 
 SRC = $(shell find $(SRC_DIR) -name '*.sv')
