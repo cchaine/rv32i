@@ -65,7 +65,7 @@ module rv32i import riscv_pkg::*; (
     .instruction_i  (  id_ex_instruction  ),
     .reg_rdataa_i   (  reg_rdataa         ),
     .reg_rdatab_i   (  reg_rdatab         ),
-    .result_o       (  ex_result          ),
+    .data_o         (  ex_result          ),
     .instruction_o  (  ex_wb_instruction  )
   );
 

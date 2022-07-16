@@ -21,26 +21,26 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module exstage (
+module exstage import riscv_pkg::*; (
   input   logic          clk_i,
   input   logic          rst_i,
   input   riscv_pkg::instruction_t  instruction_i,
   input   logic[31:0]    reg_rdataa_i,
   input   logic[31:0]    reg_rdatab_i,
-  output  logic[31:0]    result_o,
+  output  logic[31:0]    data_o,
   output  riscv_pkg::instruction_t  instruction_o
 );
   logic[2:0]   alu_op;
   logic        alu_alt_op;
   logic[31:0]  operand1, operand2;
-  logic[31:0]  result;
+  logic[31:0]  alu_result;
 
   alu inst_alu (
     .op_i        (  alu_op      ),
     .alt_op_i    (  alu_alt_op  ),
     .operand1_i  (  operand1    ),
     .operand2_i  (  operand2    ),
-    .result_o    (  result      )
+    .result_o    (  alu_result      )
   );
 
   always_comb begin
@@ -48,11 +48,18 @@ module exstage (
     alu_alt_op = 0;
     operand1 = reg_rdataa_i;
     operand2 = instruction_i.is_imm ? instruction_i.imm : reg_rdatab_i;
-
-    result_o = result;
   end
 
   always_ff @(posedge clk_i) begin
     instruction_o <= instruction_i;
+    case(instruction_i.opcode)
+      OP_ALU_IMM,
+      OP_ALU:
+        data_o <= alu_result;
+      OP_LUI:
+        data_o <= instruction_i.imm;
+      default:
+        data_o <= '0;
+    endcase
   end
 endmodule // exstage

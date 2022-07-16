@@ -59,12 +59,39 @@ int tb_nop(Vrv32i * dut) {
   return 0;
 }
 
+int tb_lui(Vrv32i * dut) {
+  static int time = 0;
+  static int success = 1;
+  if(dut->clk_i) {
+    switch(time) {
+      case 0:
+        dut->rst_i = 1;
+        dut->loadmem("../tests/mem/tb_lui.mem");
+        break;
+      case 1:
+        dut->rst_i = 0;
+        break;
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+        break;
+      case 6:
+        return 1;
+    }
+
+    time += 1;
+  }
+  return 0;
+}
+
 vluint64_t sim_time = 0;
 
 // List of tests to execute
-#define num_tests 1
+#define num_tests 2
 test_t tests[] = {
-  {"nop",    tb_nop}
+  {"nop", tb_nop},
+  {"lui", tb_lui}
 };
 
 int main(int argc, char ** argv, char ** env) {

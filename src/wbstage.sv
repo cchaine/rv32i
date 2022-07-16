@@ -21,7 +21,7 @@
  * along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module wbstage (
+module wbstage import riscv_pkg::*; (
   input   logic          clk_i,
   input   logic          rst_i,
   input   riscv_pkg::instruction_t  instruction_i,
@@ -30,11 +30,34 @@ module wbstage (
   output  logic[4:0]     reg_waddr_o,
   output  logic[31:0]    reg_wdata_o
 );
+  function logic should_write(input logic[4:0] opcode);
+    unique case(opcode)
+      OP_LUI,
+      OP_AUIPC,
+      OP_LOAD,
+      OP_ALU_IMM,
+      OP_ALU:
+        return 1;
+      default:
+        return 0;
+    endcase
+  endfunction
+
+  always_ff @(posedge clk_i) begin
+    if(rst_i) begin
+      reg_write_o <= 0;
+    end else begin
+      if(should_write(instruction_i.opcode)) begin
+        reg_write_o <= 1;
+      end else begin
+        reg_write_o <= 0;
+      end
+    end
+  end
 
   always_comb begin
-    reg_write_o = 0;
-    reg_waddr_o = '0;
-    reg_wdata_o = '0;
+    reg_waddr_o = instruction_i.rd;
+    reg_wdata_o = data_i;
   end
 
 endmodule // wbstage

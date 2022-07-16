@@ -33,7 +33,7 @@ SRC = $(shell find $(SRC_DIR) -name '*.sv')
 SRC := $(addprefix $(PROJECT_ROOT), $(SRC))
 
 TOP_MODULE = rv32i
-MODULES = ${TOP_MODULE} pc regfile alu loadstore ifstage 
+MODULES = ${TOP_MODULE} pc regfile alu loadstore
 
 VERILATOR_OPTS = --cc --trace
 VERILATOR_WARNINGS = -Wall -Wno-unused -Wno-pinmissing
