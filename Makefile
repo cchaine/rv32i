@@ -47,6 +47,7 @@ all:
 
 build:
 	@mkdir -p build
+	@mkdir -p build/waves
 
 $(TOP_MODULE): build
 	@echo "Testing $@..."

@@ -434,7 +434,7 @@ int main(int argc, char ** argv, char ** env) {
   Verilated::traceEverOn(true);
   VerilatedVcdC *m_trace = new VerilatedVcdC;
   dut->trace(m_trace, 5);
-  m_trace->open("alu.vcd");
+  m_trace->open("waves/alu.vcd");
 
   action_t * current_action = actions;
   // We are done when there are no more actions and the clk is low 

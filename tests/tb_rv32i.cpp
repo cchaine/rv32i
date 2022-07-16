@@ -112,7 +112,7 @@ int main(int argc, char ** argv, char ** env) {
   while(current_test < (tests + num_tests)) {
     // Open the VCD trace if not already open
     if(!m_trace->isOpen()) {
-      trace_name = "rv32i_" + current_test->name + ".vcd";
+      trace_name = "waves/rv32i_" + current_test->name + ".vcd";
       m_trace->open(trace_name.c_str());
     }
 
