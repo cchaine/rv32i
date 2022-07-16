@@ -120,6 +120,44 @@ int tb_lui(Vrv32i * dut) {
   return 0;
 }
 
+int tb_auipc(Vrv32i * dut) { return 1; }
+int tb_jal(Vrv32i * dut) { return 1; }
+int tb_jalr(Vrv32i * dut) { return 1; }
+int tb_beq(Vrv32i * dut) { return 1; }
+int tb_bne(Vrv32i * dut) { return 1; }
+int tb_blt(Vrv32i * dut) { return 1; }
+int tb_bge(Vrv32i * dut) { return 1; }
+int tb_bltu(Vrv32i * dut) { return 1; }
+int tb_bgeu(Vrv32i * dut) { return 1; }
+int tb_lb(Vrv32i * dut) { return 1; }
+int tb_lh(Vrv32i * dut) { return 1; }
+int tb_lw(Vrv32i * dut) { return 1; }
+int tb_lbu(Vrv32i * dut) { return 1; }
+int tb_lhu(Vrv32i * dut) { return 1; }
+int tb_sb(Vrv32i * dut) { return 1; }
+int tb_sh(Vrv32i * dut) { return 1; }
+int tb_sw(Vrv32i * dut) { return 1; }
+int tb_add(Vrv32i * dut) { return 1; }
+int tb_sub(Vrv32i * dut) { return 1; }
+int tb_sll(Vrv32i * dut) { return 1; }
+int tb_slt(Vrv32i * dut) { return 1; }
+int tb_sltu(Vrv32i * dut) { return 1; }
+int tb_xor(Vrv32i * dut) { return 1; }
+int tb_srl(Vrv32i * dut) { return 1; }
+int tb_sra(Vrv32i * dut) { return 1; }
+int tb_or(Vrv32i * dut) { return 1; }
+int tb_and(Vrv32i * dut) { return 1; }
+int tb_fence(Vrv32i * dut) { return 1; }
+int tb_fencei(Vrv32i * dut) { return 1; }
+int tb_ecall(Vrv32i * dut) { return 1; }
+int tb_ebreak(Vrv32i * dut) { return 1; }
+int tb_csrrw(Vrv32i * dut) { return 1; }
+int tb_csrrs(Vrv32i * dut) { return 1; }
+int tb_csrrc(Vrv32i * dut) { return 1; }
+int tb_csrrwi(Vrv32i * dut) { return 1; }
+int tb_csrrsi(Vrv32i * dut) { return 1; }
+int tb_csrrci(Vrv32i * dut) { return 1; }
+
 vluint64_t sim_time = 0;
 
 // List of tests to execute
@@ -127,43 +165,43 @@ vluint64_t sim_time = 0;
 test_t tests[] = {
   {"nop",      tb_nop},
   {"lui",      tb_lui},
-  {"auipc",    NULL,     SKIP},
-  {"jal",      NULL,     SKIP},
-  {"jalr",     NULL,     SKIP},
-  {"beq",      NULL,     SKIP},
-  {"bne",      NULL,     SKIP},
-  {"blt",      NULL,     SKIP},
-  {"bge",      NULL,     SKIP},
-  {"bltu",     NULL,     SKIP},
-  {"bgeu",     NULL,     SKIP},
-  {"lb",       NULL,     SKIP},
-  {"lh",       NULL,     SKIP},
-  {"lw",       NULL,     SKIP},
-  {"lbu",      NULL,     SKIP},
-  {"lhu",      NULL,     SKIP},
-  {"sb",       NULL,     SKIP},
-  {"sh",       NULL,     SKIP},
-  {"sw",       NULL,     SKIP},
-  {"add",      NULL,     SKIP},
-  {"sub",      NULL,     SKIP},
-  {"sll",      NULL,     SKIP},
-  {"slt",      NULL,     SKIP},
-  {"sltu",     NULL,     SKIP},
-  {"xor",      NULL,     SKIP},
-  {"srl",      NULL,     SKIP},
-  {"sra",      NULL,     SKIP},
-  {"or",       NULL,     SKIP},
-  {"and",      NULL,     SKIP},
-  {"fence",    NULL,     SKIP},
-  {"fence.i",  NULL,     SKIP},
-  {"ecall",    NULL,     SKIP},
-  {"ebreak",   NULL,     SKIP},
-  {"csrrw",    NULL,     SKIP},
-  {"csrrs",    NULL,     SKIP},
-  {"csrrc",    NULL,     SKIP},
-  {"csrrwi",   NULL,     SKIP},
-  {"csrrsi",   NULL,     SKIP},
-  {"csrrci",   NULL,     SKIP},
+  {"auipc",    tb_auipc,   SKIP},
+  {"jal",      tb_jal,     SKIP},
+  {"jalr",     tb_jalr,    SKIP},
+  {"beq",      tb_beq,     SKIP},
+  {"bne",      tb_bne,     SKIP},
+  {"blt",      tb_blt,     SKIP},
+  {"bge",      tb_bge,     SKIP},
+  {"bltu",     tb_bltu,    SKIP},
+  {"bgeu",     tb_bgeu,    SKIP},
+  {"lb",       tb_lb,      SKIP},
+  {"lh",       tb_lh,      SKIP},
+  {"lw",       tb_lw,      SKIP},
+  {"lbu",      tb_lbu,     SKIP},
+  {"lhu",      tb_lhu,     SKIP},
+  {"sb",       tb_sb,      SKIP},
+  {"sh",       tb_sh,      SKIP},
+  {"sw",       tb_sw,      SKIP},
+  {"add",      tb_add,     SKIP},
+  {"sub",      tb_sub,     SKIP},
+  {"sll",      tb_sll,     SKIP},
+  {"slt",      tb_slt,     SKIP},
+  {"sltu",     tb_sltu,    SKIP},
+  {"xor",      tb_xor,     SKIP},
+  {"srl",      tb_srl,     SKIP},
+  {"sra",      tb_sra,     SKIP},
+  {"or",       tb_or,      SKIP},
+  {"and",      tb_and,     SKIP},
+  {"fence",    tb_fence,   SKIP},
+  {"fence.i",  tb_fencei,  SKIP},
+  {"ecall",    tb_ecall,   SKIP},
+  {"ebreak",   tb_ebreak,  SKIP},
+  {"csrrw",    tb_csrrw,   SKIP},
+  {"csrrs",    tb_csrrs,   SKIP},
+  {"csrrc",    tb_csrrc,   SKIP},
+  {"csrrwi",   tb_csrrwi,  SKIP},
+  {"csrrsi",   tb_csrrsi,  SKIP},
+  {"csrrci",   tb_csrrci,  SKIP},
 };
 
 int main(int argc, char ** argv, char ** env) {
