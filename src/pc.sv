@@ -28,20 +28,19 @@ module pc #(
   input   logic        rst_i,
   output  logic[31:0]  pc_o
 );
+  logic[31:0] pc_d, pc_q;
 
-logic[31:0] pc_d, pc_q;
-
-always_ff @(posedge clk_i) begin
-  if(rst_i) begin
-    pc_d <= RESET_ADDR;
-    pc_q <= RESET_ADDR;
-  end else begin
-    pc_d <= pc_d + 32'h4;
-    pc_q <= pc_d;
+  always_ff @(posedge clk_i) begin
+    if(rst_i) begin
+      pc_d <= RESET_ADDR;
+      pc_q <= RESET_ADDR;
+    end else begin
+      pc_d <= pc_d + 32'h4;
+      pc_q <= pc_d;
+    end
   end
-end
 
-always_comb begin
-  pc_o = pc_q;
-end
+  always_comb begin
+    pc_o = pc_q;
+  end
 endmodule // pc

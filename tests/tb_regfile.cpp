@@ -27,6 +27,8 @@
 #include <verilated_vcd_c.h>
 #include <svdpi.h>
 
+#include <term.h>
+
 #include "Vregfile.h"
 
 typedef int (*action_t)(Vregfile *);
@@ -36,7 +38,6 @@ int reset(Vregfile * dut) {
   if(dut->clk_i) {
     switch(time) {
       case 0:
-        printf("Starting reset\n");
       case 1:
       case 2:
       case 3:
@@ -60,11 +61,10 @@ int reset(Vregfile * dut) {
 
 int tb_write_read(Vregfile * dut) {
   static int time = 0;
-
+  static int success = 1;
   if(dut->clk_i) {
     switch(time) {
       case 0:
-        printf("Starting tb_write_read\n");
         // Set first data to be written
         dut->waddr_i = 0x1;
         dut->wdata_i = 0xAAAAAAAA;
@@ -88,10 +88,17 @@ int tb_write_read(Vregfile * dut) {
         dut->eval();
 
         if(dut->rdataa_o != 0xAAAAAAAA) {
-          printf("Failed tb_write_read: written 0xAAAAAAAA, read %x @ 0x1\n", dut->rdataa_o);
+          pfail("Failed tb_write_read: written 0xAAAAAAAA, read %x @ 0x1\n", dut->rdataa_o);
+          success = 0;
         }
         if(dut->rdatab_o != 0xBBBBBBBB) {
-          printf("Failed tb_write_read: written 0xAAAAAAAA, read %x @ 0x2\n", dut->rdataa_o);
+          pfail("Failed tb_write_read: written 0xAAAAAAAA, read %x @ 0x2\n", dut->rdataa_o);
+          success = 0;
+        }
+        break;
+      case 4:
+        if(success) {
+          psuccess("Success tb_write_read!\n");
         }
         return 1;
     }
@@ -103,10 +110,10 @@ int tb_write_read(Vregfile * dut) {
 
 int tb_write_read_x0(Vregfile * dut) {
   static int time = 0;
+  static int success = 1;
   if(dut->clk_i) {
     switch(time) {
       case 0:
-        printf("Starting tb_write_read_x0\n");
         // Write to x0
         dut->waddr_i = 0;
         dut->wdata_i = 0xAAAAAAAA;
@@ -123,7 +130,13 @@ int tb_write_read_x0(Vregfile * dut) {
         dut->eval();
 
         if(dut->rdataa_o != 0) {
-          printf("Failed tb_write_read_x0\n");
+          pfail("Failed tb_write_read_x0\n");
+          success = 0;
+        }
+        break;
+      case 3:
+        if(success) {
+          psuccess("Success tb_write_read_x0!\n");
         }
         return 1;
     }

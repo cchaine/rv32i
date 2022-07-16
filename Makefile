@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with rv32i.  If not, see <http://www.gnu.org/licenses/>.
 
-.PHONY: sim
+.PHONY: unit
 
 PROJECT_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
@@ -33,7 +33,7 @@ SRC = $(shell find $(SRC_DIR) -name '*.sv')
 SRC := $(addprefix $(PROJECT_ROOT), $(SRC))
 
 TOP_MODULE = rv32i
-MODULES = ${TOP_MODULE} pc regfile alu loadstore
+MODULES = pc regfile alu loadstore
 
 VERILATOR_OPTS = --cc --trace
 VERILATOR_WARNINGS = -Wall -Wno-unused -Wno-pinmissing
@@ -46,20 +46,31 @@ all:
 		--top-module ${TOP_MODULE}
 
 build:
-	mkdir -p build
+	@mkdir -p build
 
-$(MODULES): build
-	@echo "Simulating module $@"
-	verilator \
+$(TOP_MODULE): build
+	@echo "Testing $@..."
+	@verilator \
 		${VERILATOR_OPTS} ${VERILATOR_WARNINGS} \
 		--Mdir build/ \
 		--exe ${INCLUDE} ${SRC} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp \
 		--top-module $@ --prefix V$@ \
 		-CFLAGS -I${PROJECT_ROOT}/tests/lib -CFLAGS -g
-	make -C build -f V$@.mk V$@
+	@make -C build -f V$@.mk V$@ > /dev/null
+	@cd build/ && ./V$@
 
-sim : $(MODULES)
-	echo "$(TESTS)"
+$(MODULES): build
+	@echo "Testing $@..."
+	@verilator \
+		${VERILATOR_OPTS} ${VERILATOR_WARNINGS} \
+		--Mdir build/ \
+		-exe ${INCLUDE} ${SRC_DIR}/$@.sv ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp \
+		--top-module $@ --prefix V$@ \
+		-CFLAGS -I${PROJECT_ROOT}/tests/lib -CFLAGS -g
+	@make -C build -f V$@.mk V$@ > /dev/null
+	@cd build/ && ./V$@
+
+unit : $(TOP_MODULE) $(MODULES)
 
 clean:
 	rm -rf build
