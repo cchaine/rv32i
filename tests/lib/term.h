@@ -12,6 +12,8 @@
 
 #define psuccess(format, ...) \
   printf(CGRN format CRST __VA_OPT__(,) __VA_ARGS__)
+#define pwarn(format, ...) \
+  printf(CYEL format CRST __VA_OPT__(,) __VA_ARGS__)
 #define pfail(format, ...) \
   printf(CRED format CRST __VA_OPT__(,) __VA_ARGS__)
 
