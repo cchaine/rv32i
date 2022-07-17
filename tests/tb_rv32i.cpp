@@ -59,30 +59,10 @@ typedef struct {
   char skip = 0;
 } test_t;
 
-int tb_nop(Vrv32i * dut) {
-  static int time = 0;
-  if(dut->clk_i) {
-    switch(time) {
-      case 0:
-        dut->rst_i = 1;
-        loadmem(dut, "../tests/mem/nop.mem");
-        break;
-      case 1:
-        dut->rst_i = 0;
-        break;
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-        return 1;
-    }
-
-    time += 1;
-  }
-  return 0;
-}
-
+/**
+ * Runs :
+ *   lui a0, 0x12345
+ */
 int tb_lui(Vrv32i * dut) {
   static int time = 0;
   static int success = 1;
@@ -137,6 +117,14 @@ int tb_sb(Vrv32i * dut) { return 1; }
 int tb_sh(Vrv32i * dut) { return 1; }
 int tb_sw(Vrv32i * dut) { return 1; }
 
+/**
+ * Runs:
+ *   addi a0, x0, 10
+ *   nop
+ *   addi a1, a0, 5
+ *   nop
+ *   add  a2, a0, a1
+ */
 int tb_add(Vrv32i * dut) { 
   static int time = 0;
   static int success = 1;
@@ -217,9 +205,8 @@ int tb_csrrci(Vrv32i * dut) { return 1; }
 vluint64_t sim_time = 0;
 
 // List of tests to execute
-#define num_tests 39
+#define num_tests 38
 test_t tests[] = {
-  {"nop",      tb_nop},
   {"lui",      tb_lui},
   {"auipc",    tb_auipc,   SKIP},
   {"jal",      tb_jal,     SKIP},
