@@ -86,7 +86,6 @@ int tb_nop(Vrv32i * dut) {
 int tb_lui(Vrv32i * dut) {
   static int time = 0;
   static int success = 1;
-  svScope scope;
   if(dut->clk_i) {
     switch(time) {
       case 0:
@@ -137,7 +136,64 @@ int tb_lhu(Vrv32i * dut) { return 1; }
 int tb_sb(Vrv32i * dut) { return 1; }
 int tb_sh(Vrv32i * dut) { return 1; }
 int tb_sw(Vrv32i * dut) { return 1; }
-int tb_add(Vrv32i * dut) { return 1; }
+
+int tb_add(Vrv32i * dut) { 
+  static int time = 0;
+  static int success = 1;
+  if(dut->clk_i) {
+    switch(time) {
+      case 0:
+        dut->rst_i = 1;
+        loadmem(dut, "../tests/mem/add.mem");
+        break;
+      case 1:
+        dut->rst_i = 0;
+        break;
+      case 2:
+      case 3:
+      case 4:
+        break;
+      case 5: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a0 != 0xa) {
+          pfail("Failed tb_add: expected a0 = 0xa, read 0x%08x\n", regs.a0);
+          success = 0;
+        }
+        break;
+      }
+      case 6: break; // Bubble
+      case 7: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a1 != 0xf) {
+          pfail("Failed tb_add: expected a1 = 0xf, read 0x%08x\n", regs.a1);
+          success = 0;
+        }
+        break;
+      }
+      case 8: break; // Bubble
+      case 9: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a2 != 0x19) {
+          pfail("Failed tb_add: expected a2 = 0x19, read 0x%08x\n", regs.a2);
+          success = 0;
+        }
+        break;
+      }
+      case 10:
+        if(success) {
+          psuccess("Success tb_add!\n");
+        } else {
+          regs_t regs = get_regs(dut);
+          print_regs(regs);
+        }
+        return 1;
+    }
+
+    time += 1;
+  }
+  return 0;
+}
+
 int tb_sub(Vrv32i * dut) { return 1; }
 int tb_sll(Vrv32i * dut) { return 1; }
 int tb_slt(Vrv32i * dut) { return 1; }
@@ -182,7 +238,7 @@ test_t tests[] = {
   {"sb",       tb_sb,      SKIP},
   {"sh",       tb_sh,      SKIP},
   {"sw",       tb_sw,      SKIP},
-  {"add",      tb_add,     SKIP},
+  {"add",      tb_add},
   {"sub",      tb_sub,     SKIP},
   {"sll",      tb_sll,     SKIP},
   {"slt",      tb_slt,     SKIP},
