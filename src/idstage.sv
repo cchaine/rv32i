@@ -53,6 +53,9 @@ module idstage (
         decoded_instr.f3         =  instruction_i[14:12];
         decoded_instr.rs1        =  instruction_i[19:15];
         decoded_instr.imm[11:0]  =  instruction_i[31:20];
+        // sign-extend
+        decoded_instr.imm[31:12] = 
+          instruction_i[31] == 1 ? 20'hFFFFF : '0;
         decoded_instr.is_imm     =  1;
       end
       // S-type instruction

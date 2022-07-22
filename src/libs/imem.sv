@@ -39,4 +39,11 @@ task loadmem (input string path);
   $readmemh(path, mem); 
 endtask;
 
+// This task is used by Verilator to get
+// the content of a memory cell
+export "DPI-C" task getmem;
+task getmem(input bit[31:0] addr, output bit[31:0] out);
+  out = mem[addr[13:2]];
+endtask;
+
 endmodule // imem

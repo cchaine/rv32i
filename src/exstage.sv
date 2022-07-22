@@ -45,7 +45,7 @@ module exstage import riscv_pkg::*; (
 
   always_comb begin
     alu_op = instruction_i.f3;
-    alu_alt_op = 0;
+    alu_alt_op = instruction_i.f7 != '0;
     operand1 = reg_rdataa_i;
     operand2 = instruction_i.is_imm ? instruction_i.imm : reg_rdatab_i;
   end

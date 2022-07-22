@@ -23,8 +23,13 @@
 
 PROJECT_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+AS = riscv64-unknown-elf-as
+OBJCOPY = riscv64-unknown-elf-objcopy
+
+BUILD_DIR = build
 SRC_DIR = src
 TB_DIR = tests
+MEM_DIR = mem
 
 INCLUDE = $(SRC_DIR)/include/riscv_pkg.svh
 INCLUDE := $(addprefix $(PROJECT_ROOT), $(INCLUDE))
@@ -34,6 +39,9 @@ SRC := $(addprefix $(PROJECT_ROOT), $(SRC))
 
 TOP_MODULE = rv32i
 MODULES = pc regfile alu loadstore
+
+MEMORY_FILES_SRC = $(wildcard $(TB_DIR)/$(MEM_DIR)/*.S)
+MEMORY_FILES = $(addprefix $(BUILD_DIR)/$(MEM_DIR)/, $(notdir $(MEMORY_FILES_SRC:.S=.hex)))
 
 VERILATOR_OPTS = --cc --trace
 VERILATOR_WARNINGS = -Wall -Wno-unused -Wno-pinmissing
@@ -45,33 +53,39 @@ all:
 	 	${INCLUDE} ${SRC} \
 		--top-module ${TOP_MODULE}
 
-build:
-	@mkdir -p build
-	@mkdir -p build/waves
+$(BUILD_DIR):
+	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)/waves
+	@mkdir -p $(BUILD_DIR)/mem
 
-$(TOP_MODULE): build
+$(TOP_MODULE): $(BUILD_DIR) $(MEMORY_FILES)
 	@echo "Testing $@..."
 	@verilator \
 		${VERILATOR_OPTS} ${VERILATOR_WARNINGS} \
-		--Mdir build/ \
+		--Mdir $(BUILD_DIR)/ \
 		--exe ${INCLUDE} ${SRC} ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp \
 		--top-module $@ --prefix V$@ \
 		-CFLAGS -I${PROJECT_ROOT}/tests/lib -CFLAGS -g
-	@make -C build -f V$@.mk V$@ > /dev/null
-	@cd build/ && ./V$@
+	@make -C $(BUILD_DIR) -f V$@.mk V$@ > /dev/null
+	@cd $(BUILD_DIR)/ && ./V$@
 
-$(MODULES): build
+$(MODULES): $(BUILD_DIR)
 	@echo "Testing $@..."
 	@verilator \
 		${VERILATOR_OPTS} ${VERILATOR_WARNINGS} \
-		--Mdir build/ \
+		--Mdir $(BUILD_DIR)/ \
 		-exe ${INCLUDE} ${SRC_DIR}/$@.sv ${PROJECT_ROOT}${TB_DIR}/tb_$@.cpp \
 		--top-module $@ --prefix V$@ \
 		-CFLAGS -I${PROJECT_ROOT}/tests/lib -CFLAGS -g
-	@make -C build -f V$@.mk V$@ > /dev/null
-	@cd build/ && ./V$@
+	@make -C $(BUILD_DIR) -f V$@.mk V$@ > /dev/null
+	@cd $(BUILD_DIR)/ && ./V$@
 
-unit : $(TOP_MODULE) $(MODULES)
+$(MEMORY_FILES): $(MEMORY_FILES_SRC)
+	@$(AS) $(TB_DIR)/$(MEM_DIR)/$(notdir $(@:.hex=.S)) -o $(BUILD_DIR)/$(notdir $(@:.hex=.o))
+	@$(OBJCOPY) -O binary -j .text $(BUILD_DIR)/$(notdir $(@:.hex=.o)) $(BUILD_DIR)/$(notdir $(@:.hex=.bin))
+	@xxd -g 4 -e -c 4 $(BUILD_DIR)/$(notdir $(@:.hex=.bin)) | awk '{print $$2}' > $@
+
+unit : $(MODULES) $(TOP_MODULE)
 
 clean:
-	rm -rf build
+	rm -rf $(BUILD_DIR)

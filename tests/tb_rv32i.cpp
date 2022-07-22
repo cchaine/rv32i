@@ -52,6 +52,15 @@ regs_t get_regs(Vrv32i * dut) {
   return regs;
 }
 
+uint32_t get_mem(Vrv32i * dut, uint32_t addr) {
+  svScope scope = svGetScopeFromName("TOP.rv32i.inst_ifstage.inst_imem");
+  assert(scope);
+  svSetScope(scope);
+  uint32_t value;
+  dut->getmem((svBitVecVal*)&addr, &value);
+  return value;
+}
+
 typedef int (*action_t)(Vrv32i*);
 typedef struct {
   std::string name;
@@ -60,8 +69,10 @@ typedef struct {
 } test_t;
 
 /**
- * Runs :
- *   lui a0, 0x12345
+ * Tests:
+ *  loading the upper 20bits of a register
+ * Expects:
+ *  a0 = 0x12345000
  */
 int tb_lui(Vrv32i * dut) {
   static int time = 0;
@@ -70,7 +81,7 @@ int tb_lui(Vrv32i * dut) {
     switch(time) {
       case 0:
         dut->rst_i = 1;
-        loadmem(dut, "../tests/mem/lui.mem");
+        loadmem(dut, "./mem/lui.hex");
         break;
       case 1:
         dut->rst_i = 0;
@@ -102,37 +113,30 @@ int tb_lui(Vrv32i * dut) {
 int tb_auipc(Vrv32i * dut) { return 1; }
 int tb_jal(Vrv32i * dut) { return 1; }
 int tb_jalr(Vrv32i * dut) { return 1; }
-int tb_beq(Vrv32i * dut) { return 1; }
-int tb_bne(Vrv32i * dut) { return 1; }
-int tb_blt(Vrv32i * dut) { return 1; }
-int tb_bge(Vrv32i * dut) { return 1; }
-int tb_bltu(Vrv32i * dut) { return 1; }
-int tb_bgeu(Vrv32i * dut) { return 1; }
-int tb_lb(Vrv32i * dut) { return 1; }
-int tb_lh(Vrv32i * dut) { return 1; }
-int tb_lw(Vrv32i * dut) { return 1; }
-int tb_lbu(Vrv32i * dut) { return 1; }
-int tb_lhu(Vrv32i * dut) { return 1; }
-int tb_sb(Vrv32i * dut) { return 1; }
-int tb_sh(Vrv32i * dut) { return 1; }
-int tb_sw(Vrv32i * dut) { return 1; }
+int tb_branch(Vrv32i * dut) { return 1; }
+int tb_load(Vrv32i * dut) { return 1; }
 
 /**
- * Runs:
- *   addi a0, x0, 10
- *   nop
- *   addi a1, a0, 5
- *   nop
- *   add  a2, a0, a1
+ * Tests:
+ *  storing a byte in memory without offset
+ *  storing a half-word in memory without offset
+ *  storing a word in memory without offset
+ *  storing in memory with positive offset
+ *  storing in memory with negative offset
+ *  storing in memory with missaligned address 
+ * Expects:
+ *  a0 = 1
+ *  a1 = 9
+ *  a2 = 0xFFFFFF00
  */
-int tb_add(Vrv32i * dut) { 
+int tb_store(Vrv32i * dut) {
   static int time = 0;
   static int success = 1;
   if(dut->clk_i) {
     switch(time) {
       case 0:
         dut->rst_i = 1;
-        loadmem(dut, "../tests/mem/add.mem");
+        loadmem(dut, "./mem/store.hex");
         break;
       case 1:
         dut->rst_i = 0;
@@ -143,8 +147,8 @@ int tb_add(Vrv32i * dut) {
         break;
       case 5: {
         regs_t regs = get_regs(dut); 
-        if(regs.a0 != 0xa) {
-          pfail("Failed tb_add: expected a0 = 0xa, read 0x%08x\n", regs.a0);
+        if(regs.a0 != 0x1) {
+          pfail("Failed tb_alu_imm: expected a0 = 0x1, read 0x%08x\n", regs.a0);
           success = 0;
         }
         break;
@@ -152,8 +156,8 @@ int tb_add(Vrv32i * dut) {
       case 6: break; // Bubble
       case 7: {
         regs_t regs = get_regs(dut); 
-        if(regs.a1 != 0xf) {
-          pfail("Failed tb_add: expected a1 = 0xf, read 0x%08x\n", regs.a1);
+        if(regs.a1 != 0xa) {
+          pfail("Failed tb_alu_imm: expected a1 = 0xa, read 0x%08x\n", regs.a1);
           success = 0;
         }
         break;
@@ -161,18 +165,79 @@ int tb_add(Vrv32i * dut) {
       case 8: break; // Bubble
       case 9: {
         regs_t regs = get_regs(dut); 
-        if(regs.a2 != 0x19) {
-          pfail("Failed tb_add: expected a2 = 0x19, read 0x%08x\n", regs.a2);
+        if(regs.a2 != 0xFFFFFF00) {
+          pfail("Failed tb_alu_imm: expected a2 = 0xFFFFFF00, read 0x%08x\n", regs.a2);
           success = 0;
         }
         break;
       }
       case 10:
         if(success) {
-          psuccess("Success tb_add!\n");
-        } else {
-          regs_t regs = get_regs(dut);
-          print_regs(regs);
+          psuccess("Success tb_alu_imm!\n");
+        }
+        return 1;
+    }
+
+    time += 1;
+  }
+  return 0;
+
+}
+
+/**
+ * Tests:
+ *  the alu with immediate values
+ *  immediate values sign-extend
+ * Expects:
+ *  a0 = 1
+ *  a1 = 9
+ *  a2 = 0xFFFFFF00
+ */
+int tb_alu_imm(Vrv32i * dut) {
+  static int time = 0;
+  static int success = 1;
+  if(dut->clk_i) {
+    switch(time) {
+      case 0:
+        dut->rst_i = 1;
+        loadmem(dut, "./mem/alu_imm.hex");
+        break;
+      case 1:
+        dut->rst_i = 0;
+        break;
+      case 2:
+      case 3:
+      case 4:
+        break;
+      case 5: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a0 != 0x1) {
+          pfail("Failed tb_alu_imm: expected a0 = 0x1, read 0x%08x\n", regs.a0);
+          success = 0;
+        }
+        break;
+      }
+      case 6: break; // Bubble
+      case 7: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a1 != 0xa) {
+          pfail("Failed tb_alu_imm: expected a1 = 0xa, read 0x%08x\n", regs.a1);
+          success = 0;
+        }
+        break;
+      }
+      case 8: break; // Bubble
+      case 9: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a2 != 0xFFFFFF00) {
+          pfail("Failed tb_alu_imm: expected a2 = 0xFFFFFF00, read 0x%08x\n", regs.a2);
+          success = 0;
+        }
+        break;
+      }
+      case 10:
+        if(success) {
+          psuccess("Success tb_alu_imm!\n");
         }
         return 1;
     }
@@ -182,69 +247,98 @@ int tb_add(Vrv32i * dut) {
   return 0;
 }
 
-int tb_sub(Vrv32i * dut) { return 1; }
-int tb_sll(Vrv32i * dut) { return 1; }
-int tb_slt(Vrv32i * dut) { return 1; }
-int tb_sltu(Vrv32i * dut) { return 1; }
-int tb_xor(Vrv32i * dut) { return 1; }
-int tb_srl(Vrv32i * dut) { return 1; }
-int tb_sra(Vrv32i * dut) { return 1; }
-int tb_or(Vrv32i * dut) { return 1; }
-int tb_and(Vrv32i * dut) { return 1; }
-int tb_fence(Vrv32i * dut) { return 1; }
-int tb_fencei(Vrv32i * dut) { return 1; }
-int tb_ecall(Vrv32i * dut) { return 1; }
-int tb_ebreak(Vrv32i * dut) { return 1; }
-int tb_csrrw(Vrv32i * dut) { return 1; }
-int tb_csrrs(Vrv32i * dut) { return 1; }
-int tb_csrrc(Vrv32i * dut) { return 1; }
-int tb_csrrwi(Vrv32i * dut) { return 1; }
-int tb_csrrsi(Vrv32i * dut) { return 1; }
-int tb_csrrci(Vrv32i * dut) { return 1; }
+/**
+ * Tests:
+ *  the alu with register operands
+ *  the sub instruction decoding (f7 field)
+ * Expects:
+ *  a0 = 0x1
+ *  a1 = 0x9
+ *  a2 = 0xa
+ *  a3 = 0xFFFFFFF8
+ */
+int tb_alu(Vrv32i * dut) {
+  static int time = 0;
+  static int success = 1;
+  if(dut->clk_i) {
+    switch(time) {
+      case 0:
+        dut->rst_i = 1;
+        loadmem(dut, "./mem/alu.hex");
+        break;
+      case 1:
+        dut->rst_i = 0;
+        break;
+      case 2:
+      case 3:
+      case 4:
+        break;
+      case 5: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a0 != 0x1) {
+          pfail("Failed tb_alu: expected a0 = 0x1, read 0x%08x\n", regs.a0);
+          success = 0;
+        }
+        break;
+      }
+      case 6: break; // Bubble
+      case 7: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a1 != 0x9) {
+          pfail("Failed tb_alu: expected a1 = 0x9, read 0x%08x\n", regs.a1);
+          success = 0;
+        }
+        break;
+      }
+      case 8: break; // Bubble
+      case 9: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a2 != 0xa) {
+          pfail("Failed tb_alu: expected a2 = 0xa, read 0x%08x\n", regs.a2);
+          success = 0;
+        }
+        break;
+      }
+      case 10: break; // Bubble
+      case 11: {
+        regs_t regs = get_regs(dut); 
+        if(regs.a3 != 0xFFFFFFF8) {
+          pfail("Failed tb_alu: expected a3 = 0xFFFFFFF8, read 0x%08x\n", regs.a3);
+          success = 0;
+        }
+        break;
+      }
+      case 12:
+        if(success) {
+          psuccess("Success tb_alu!\n");
+        }
+        return 1;
+    }
+
+    time += 1;
+  }
+  return 0;
+}
+
+int tb_misc_mem(Vrv32i * dut) { return 1; }
+int tb_system(Vrv32i * dut) { return 1; }
 
 vluint64_t sim_time = 0;
 
 // List of tests to execute
-#define num_tests 38
+#define num_tests 11
 test_t tests[] = {
   {"lui",      tb_lui},
-  {"auipc",    tb_auipc,   SKIP},
-  {"jal",      tb_jal,     SKIP},
-  {"jalr",     tb_jalr,    SKIP},
-  {"beq",      tb_beq,     SKIP},
-  {"bne",      tb_bne,     SKIP},
-  {"blt",      tb_blt,     SKIP},
-  {"bge",      tb_bge,     SKIP},
-  {"bltu",     tb_bltu,    SKIP},
-  {"bgeu",     tb_bgeu,    SKIP},
-  {"lb",       tb_lb,      SKIP},
-  {"lh",       tb_lh,      SKIP},
-  {"lw",       tb_lw,      SKIP},
-  {"lbu",      tb_lbu,     SKIP},
-  {"lhu",      tb_lhu,     SKIP},
-  {"sb",       tb_sb,      SKIP},
-  {"sh",       tb_sh,      SKIP},
-  {"sw",       tb_sw,      SKIP},
-  {"add",      tb_add},
-  {"sub",      tb_sub,     SKIP},
-  {"sll",      tb_sll,     SKIP},
-  {"slt",      tb_slt,     SKIP},
-  {"sltu",     tb_sltu,    SKIP},
-  {"xor",      tb_xor,     SKIP},
-  {"srl",      tb_srl,     SKIP},
-  {"sra",      tb_sra,     SKIP},
-  {"or",       tb_or,      SKIP},
-  {"and",      tb_and,     SKIP},
-  {"fence",    tb_fence,   SKIP},
-  {"fence.i",  tb_fencei,  SKIP},
-  {"ecall",    tb_ecall,   SKIP},
-  {"ebreak",   tb_ebreak,  SKIP},
-  {"csrrw",    tb_csrrw,   SKIP},
-  {"csrrs",    tb_csrrs,   SKIP},
-  {"csrrc",    tb_csrrc,   SKIP},
-  {"csrrwi",   tb_csrrwi,  SKIP},
-  {"csrrsi",   tb_csrrsi,  SKIP},
-  {"csrrci",   tb_csrrci,  SKIP},
+  {"auipc",    tb_auipc,    SKIP},
+  {"jal",      tb_jal,      SKIP},
+  {"jalr",     tb_jalr,     SKIP},
+  {"branch",   tb_branch,   SKIP},
+  {"load",     tb_load,     SKIP},
+  {"store",    tb_store,    SKIP},
+  {"alu_imm",  tb_alu_imm},
+  {"alu",      tb_alu},
+  {"misc_mem", tb_misc_mem, SKIP},
+  {"system",   tb_system,   SKIP}
 };
 
 int main(int argc, char ** argv, char ** env) {
